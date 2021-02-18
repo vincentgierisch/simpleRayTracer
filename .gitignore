@@ -1,0 +1,9 @@
+# custom ignores
+
+.vscode
+build
+bin
+
+render-data
+
+*.png
