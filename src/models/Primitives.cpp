@@ -1,34 +1,62 @@
 #include "../../include/models/Primitives.hpp"
 
-bool Triangle::doesIntersect(Ray& ray){
-    const float EPSILON = 0.0000001;
-    vec3 vertex0 = inTriangle->vertex0;
-    vec3 vertex1 = inTriangle->vertex1;  
-    vec3 vertex2 = inTriangle->vertex2;
-    vec3 edge1, edge2, h, s, q;
-    float a,f,u,v;
-    edge1 = vertex1 - vertex0;
-    edge2 = vertex2 - vertex0;
-    h = rayVector.crossProduct(edge2);
-    a = edge1.dotProduct(h);
-    if (a > -EPSILON && a < EPSILON)
-        return false;    // This ray is parallel to this triangle.
-    f = 1.0/a;
-    s = rayOrigin - vertex0;
-    u = f * s.dotProduct(h);
-    if (u < 0.0 || u > 1.0)
-        return false;
-    q = s.crossProduct(edge1);
-    v = f * rayVector.dotProduct(q);
-    if (v < 0.0 || u + v > 1.0)
-        return false;
-    // At this stage we can compute t to find out where the intersection point is on the line.
-    float t = f * edge2.dotProduct(q);
-    if (t > EPSILON) // ray intersection
-    {
-        outIntersectionPoint = rayOrigin + rayVector * t;
-        return true;
-    }
-    else // This means that there is a line intersection but not a ray intersection.
-        return false;
+TriangleIntersection Triangle::getIntersection(const Vertex* vertices, const Ray& ray){
+    TriangleIntersection ti;
+
+	// a
+	vec3 pos = vertices[this->a].pos;
+	const float a_x = pos.x;
+	const float a_y = pos.y;
+	const float a_z = pos.z;
+
+	// lo
+	pos = vertices[this->b].pos;
+	const float &a = a_x - pos.x;
+	const float &b = a_y - pos.y;
+	const float &c = a_z - pos.z;
+	
+	// li
+	pos = vertices[this->c].pos;
+	const float &d = a_x - pos.x;
+	const float &e = a_y - pos.y;
+	const float &f = a_z - pos.z;
+	
+	// destination
+	const float &g = ray.direction.x;
+	const float &h = ray.direction.y;
+	const float &i = ray.direction.z;
+	
+	// ergebnis
+	const float &j = a_x - ray.origin.x;
+	const float &k = a_y - ray.origin.y;
+	const float &l = a_z - ray.origin.z;
+
+	// (a.y - c.y) * d.z - d.y * (a.z - c.z) 
+	float common1 = e*i - h*f;
+	float common2 = g*f - d*i;
+	float common3 = d*h - e*g;
+	float M 	  = a * common1  +  b * common2  +  c * common3;
+	float beta 	  = j * common1  +  k * common2  +  l * common3;
+
+	common1       = a*k - j*b;
+	common2       = j*c - a*l;
+	common3       = b*l - k*c;
+	float gamma   = i * common1  +  h * common2  +  g * common3;
+	float tt    = -(f * common1  +  e * common2  +  d * common3);
+
+	beta /= M;
+	gamma /= M;
+	tt /= M;
+
+    if (tt > FLT_MIN && tt < FLT_MAX
+        && (beta > 0) 
+        && (gamma > 0) 
+        && (beta + gamma) <= 1) {
+            ti.t = tt;
+            ti.beta = beta;
+            ti.gamma = gamma;
+            ti.triangle = this;
+        }
+    return ti;
+
 }

@@ -3,47 +3,46 @@
 #include <png++/png.hpp>
 #include <cmath>
 #include "../include/Ray.hpp"
-#include "../include/Vec3.hpp"
-#include "../include/Sphere.hpp"
 #include "../include/Color.hpp"
-#include "../include/Light.hpp"
 #include "../include/FrameBuffer.hpp"
 #include "../include/models/Scene.hpp"
+#include "../include/models/HitPoint.hpp"
+#include "../include/gi/Camera.hpp"
 
-#define PI 3.1415926
-
-void clamp255(Color& col);
+Color sample_pixel (Camera&, unsigned, unsigned);
 
 int main(int argc, char *argv[]) {
-    const int W = 2000;
-    const int H = 2000;
+    const int W = 640;
+    const int H = 360; 
 
-    Color white (255, 255, 255);
-    Light light(500, 0, 0);
-
+    //Camera camera(vec3(0, 0, 0), vec3(0, 0, -1), vec3(0, 1, 0), 65, W, H);
+    Camera camera(vec3(-2.6908, 1.7537, -0.050779), vec3(0, 0, -1), vec3(0, 1, 0), 65, W, H);
+    // vec3 position, vec3 direction, vec3 up, float phi, int width, int height
     Framebuffer framebuffer(W, H);
 
-    Scene scene;
-
-    scene.load("render-data/brdf-test.obj", "standard");
-
-    for (size_t y = 0; y < H; ++y)
-    {
-        for (size_t x = 0; x < W; ++x)
-        {
-            // send a ray through each pixel
-            Ray ray(Vec3(x,y,0), Vec3(0,0,1));
-            
-            double time = 20000;
-
-            for (Triangle& triangle: scene.Triangles) {
-                Color c(255, 0, 0);
-                framebuffer.add(x, y, c);
-            }
-        }
-    }
+    framebuffer.clear();
+    
+    Scene::getInstance().load("render-data/brdf-test-noal.obj", "standard");
+    
+    framebuffer.buffer.for_each([&](unsigned x, unsigned y) {
+										framebuffer.add(x, y, sample_pixel(camera, x, y));
+    								});
 
     framebuffer.png().write("out.png");
-
     return 0;
+}
+
+Color sample_pixel(Camera &camera, unsigned x, unsigned y) {
+    Ray ray = camera.spawnRay(x, y);
+    Color c(0, 0, 0);
+    for (Triangle& triangle: Scene::getInstance().Triangles) {
+        TriangleIntersection ti;
+        ti = triangle.getIntersection(Scene::getInstance().Vertices.data(), ray);
+        if (ti.isValid()) {
+            HitPoint hp(ti);
+            c = hp.albedo();
+            break;
+        }
+    }
+    return c;
 }

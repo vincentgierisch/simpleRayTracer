@@ -8,20 +8,21 @@ class Texture {
     private:
         std::string _path;
     public:
-        unsigned int w, h;
+        unsigned int width, height;
+        std::string name; // for identification purposes
         Color* Texel = nullptr;
 
-        const Color& sample(float u, float v) const {
-            u = u - floor(u);
-            v = v - floor(v);
+        const Color& sample(vec2 c) const {
+            float u = c.x - floor(c.x);
+            float v = c.y - floor(c.y);
 
-            int x = (int)(u*w+0.5f);
-            int y = (int)(v*h+0.5f);
+            int x = (int)(u*width+0.5f);
+            int y = (int)(v*height+0.5f);
 
-            if (x == w) x = 0;
-            if (y == h) y = 0;
+            if (x == width) x = 0;
+            if (y == height) y = 0;
 
-            return Texel[y*w+x];
+            return Texel[y*width+x];
         }
 
         ~Texture() {

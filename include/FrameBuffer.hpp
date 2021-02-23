@@ -47,10 +47,12 @@ class Buffer {
 };
 
 class Framebuffer {
-    Buffer<Color> buffer;
+        //Buffer<Color> buffer;
     public:
+        Buffer<Color> buffer;
         Framebuffer(unsigned w, unsigned h): buffer(w, h) {};
         ~Framebuffer(){}
+        void clear();
         void add(unsigned x, unsigned y, Color c);
         png::image<png::rgb_pixel> png() const;
 };

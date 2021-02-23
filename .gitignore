@@ -7,3 +7,5 @@ bin
 render-data
 
 *.png
+
+*.obj

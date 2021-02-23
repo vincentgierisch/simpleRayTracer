@@ -2,6 +2,28 @@
 
 inline vec3 to_glm(const aiVector3D& v) { return vec3(v.x, v.y, v.z); }
 
+void Scene::getPixelsFromPng(png::image<png::rgb_pixel> image, Color* storage){
+    unsigned int width = image.get_width();
+    unsigned int height = image.get_height();
+    for (int i = 0; i < (width * height); i++) {
+        png::rgb_pixel& pixel = image[i / width][i % width];
+        storage[i] = Color(pixel.red, pixel.green, pixel.blue);
+    }
+}
+
+Texture* Scene::loadTexture(std::string path){
+    png::image<png::rgb_pixel> image(path);
+    Texture* texture = new Texture;
+    texture->width = image.get_width();
+    texture->height = image.get_height();
+    texture->name = path;
+    texture->Texel = new Color[texture->width * texture->height];
+    
+    this->getPixelsFromPng(image, texture->Texel);
+
+    return texture;
+}
+
 void Scene::load(const std::string path, const std::string &name, const mat4 &trafo) {
     Assimp::Importer importer;
 
@@ -10,8 +32,6 @@ void Scene::load(const std::string path, const std::string &name, const mat4 &tr
 
     if (!scene_ai) // handle error
         throw std::runtime_error("ERROR: Failed to load file: " + path + "!");
-
-    std::cout << scene_ai->mNumMaterials << std::endl;
 
     // load materials
     for (unsigned int i = 0; i < scene_ai->mNumMaterials; i++) {
@@ -34,7 +54,14 @@ void Scene::load(const std::string path, const std::string &name, const mat4 &tr
 		material.albedo = glm_to_color(pow(color_to_glm(material.albedo), vec3(2.2f, 2.2f, 2.2f)));
 		material.emissive = colorEmissive;
 
-        // ToDo load image
+        // Load image
+        if (mat_ai->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
+            aiString ai_Path;
+            mat_ai->GetTexture(aiTextureType_DIFFUSE, 0, &ai_Path);
+            std::cout << "Texture Path: " << ai_Path.C_Str() << std::endl;
+            material.albedo_tex = this->loadTexture("render-data/" + std::string(ai_Path.C_Str()));
+            Textures.push_back(material.albedo_tex);
+        }
 
         this->Materials.push_back(material);
     }
@@ -43,6 +70,7 @@ void Scene::load(const std::string path, const std::string &name, const mat4 &tr
     for (unsigned int i = 0; i < scene_ai->mNumMeshes; i++) {
         const aiMesh* mesh_ai = scene_ai->mMeshes[i];
         uint32_t material_id = scene_ai->mMeshes[i]->mMaterialIndex;
+        uint32_t index_offset = this->Vertices.size();
 
         // ToDo: check if material is emissive
         // load vetices
@@ -55,6 +83,7 @@ void Scene::load(const std::string path, const std::string &name, const mat4 &tr
             } else {
                 vertex.textureCoordinate = vec2(0, 0);
             }
+            // std::cout << "Vertex: " << vertex.pos.x << "|" << vertex.pos.y << "|" << vertex.pos.z << std::endl;
             this->Vertices.push_back(vertex);
         }
 
@@ -64,17 +93,22 @@ void Scene::load(const std::string path, const std::string &name, const mat4 &tr
             // check if face is a triangle
             if (face.mNumIndices == 3) {
                 Triangle triangle;
-                triangle.a = face.mIndices[0]; 
-                triangle.b = face.mIndices[1]; 
-                triangle.c = face.mIndices[2]; 
+                triangle.a = face.mIndices[0] + index_offset; 
+                triangle.b = face.mIndices[1] + index_offset; 
+                triangle.c = face.mIndices[2] + index_offset; 
                 triangle.material_id = material_id;
                 this->Triangles.push_back(triangle);
+
+                // std::cout << "Triangle: " << triangle.a << triangle.b << triangle.c << std::endl;
             } else {
                 std::cout << "WARN: Mesh: skipping non-triangle [" << face.mNumIndices << "] face (that the ass imp did not triangulate)!" << std::endl;
             }
         }
 
     }
+}
 
-
+Scene::~Scene(){
+    for (Texture* texture : this->Textures)
+		delete texture;
 }

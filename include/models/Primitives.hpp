@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include "../Ray.hpp"
+#include "TriangleIntersection.hpp"
 
 using namespace glm;
 
@@ -16,5 +17,5 @@ class Triangle {
     public:
         uint32_t a, b, c;
         uint32_t material_id;
-        bool doesIntersect(Ray& ray);
+        TriangleIntersection getIntersection(const Vertex* vertices, const Ray& ray);
 };
