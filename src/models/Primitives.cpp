@@ -2,47 +2,28 @@
 
 TriangleIntersection Triangle::getIntersection(const Vertex* vertices, const Ray& ray){
     TriangleIntersection ti;
+	vec3 a = vertices[this->a].pos;
+	vec3 b = vertices[this->b].pos;
+	vec3 c = vertices[this->c].pos;
 
-	// a
-	vec3 pos = vertices[this->a].pos;
-	const float a_x = pos.x;
-	const float a_y = pos.y;
-	const float a_z = pos.z;
+    vec3 abc = a - b;
+    vec3 def = a - c;
+    vec3 ghi = ray.direction;
+    vec3 jkl = a - ray.origin;
 
-	// lo
-	pos = vertices[this->b].pos;
-	const float &a = a_x - pos.x;
-	const float &b = a_y - pos.y;
-	const float &c = a_z - pos.z;
-	
-	// li
-	pos = vertices[this->c].pos;
-	const float &d = a_x - pos.x;
-	const float &e = a_y - pos.y;
-	const float &f = a_z - pos.z;
-	
-	// destination
-	const float &g = ray.direction.x;
-	const float &h = ray.direction.y;
-	const float &i = ray.direction.z;
-	
-	// ergebnis
-	const float &j = a_x - ray.origin.x;
-	const float &k = a_y - ray.origin.y;
-	const float &l = a_z - ray.origin.z;
+    float ei_hf = (def.y * ghi.z) - (ghi.y * def.z);
+    float gf_di = (ghi.x * def.z) - (def.x * ghi.z);
+    float dh_eg = (def.x * ghi.y) - (def.y * ghi.x);
 
-	// (a.y - c.y) * d.z - d.y * (a.z - c.z) 
-	float common1 = e*i - h*f;
-	float common2 = g*f - d*i;
-	float common3 = d*h - e*g;
-	float M 	  = a * common1  +  b * common2  +  c * common3;
-	float beta 	  = j * common1  +  k * common2  +  l * common3;
+    float ak_jb = (abc.x * jkl.y) - (jkl.x * abc.y);
+    float jc_al = (jkl.x * abc.z) - (abc.x * jkl.z);
+    float bl_kc = (abc.y * jkl.z) - (jkl.y * abc.z);
 
-	common1       = a*k - j*b;
-	common2       = j*c - a*l;
-	common3       = b*l - k*c;
-	float gamma   = i * common1  +  h * common2  +  g * common3;
-	float tt    = -(f * common1  +  e * common2  +  d * common3);
+    float beta = (jkl.x * ei_hf) + (jkl.y * gf_di) + (jkl.z * dh_eg);
+    float gamma = (ghi.z * ak_jb) + (ghi.y * jc_al) + (ghi.x * bl_kc);
+    float tt = -((def.z * ak_jb) + (def.y * jc_al) + (def.x * bl_kc));
+    float M = (abc.x * ei_hf) + (abc.y * gf_di) + (abc.z * dh_eg);
+
 
 	beta /= M;
 	gamma /= M;
@@ -56,7 +37,8 @@ TriangleIntersection Triangle::getIntersection(const Vertex* vertices, const Ray
             ti.beta = beta;
             ti.gamma = gamma;
             ti.triangle = this;
-        }
+            return ti;
+    }
+    ti.t = FLT_MAX;
     return ti;
-
 }
