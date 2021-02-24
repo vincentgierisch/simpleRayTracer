@@ -59,7 +59,7 @@ void Scene::load(const std::string path, const std::string &name, const mat4 &tr
             aiString ai_Path;
             mat_ai->GetTexture(aiTextureType_DIFFUSE, 0, &ai_Path);
             std::cout << "Texture Path: " << ai_Path.C_Str() << std::endl;
-            material.albedo_tex = this->loadTexture("render-data/" + std::string(ai_Path.C_Str()));
+            material.albedo_tex = this->loadTexture("render-data/sibenik/" + std::string(ai_Path.C_Str()));
             Textures.push_back(material.albedo_tex);
         }
 
@@ -109,6 +109,9 @@ void Scene::load(const std::string path, const std::string &name, const mat4 &tr
 }
 
 Scene::~Scene(){
-    for (Texture* texture : this->Textures)
-		delete texture;
+    for (Texture* texture : this->Textures) {
+        if (texture != nullptr) {
+            delete texture;
+        }
+    }
 }

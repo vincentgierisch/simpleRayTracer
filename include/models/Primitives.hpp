@@ -6,6 +6,8 @@
 
 using namespace glm;
 
+class TriangleIntersection;
+
 class Vertex {
     public:
         vec3 pos;

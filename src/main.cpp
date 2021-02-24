@@ -8,37 +8,30 @@
 #include "../include/models/Scene.hpp"
 #include "../include/models/HitPoint.hpp"
 #include "../include/gi/Camera.hpp"
-
-Color sample_pixel (Camera&, unsigned, unsigned);
+#include "../include/Renderer.hpp"
 
 int main(int argc, char *argv[]) {
-    const int W = 640;
-    const int H = 360; 
 
     //Camera camera(vec3(0, 0, 0), vec3(0, 0, -1), vec3(0, 1, 0), 65, W, H);
-    Camera camera(vec3(-2.6908, 1.7537, -0.050779), vec3(0, 0, -1), vec3(0, 1, 0), 65, W, H);
-    // vec3 position, vec3 direction, vec3 up, float phi, int width, int height
-    Framebuffer framebuffer(W, H);
+    //Camera camera(vec3(-13,-12, 0), vec3(1, 0, 0), vec3(0, 1, 0), 65, W, H);
 
-    framebuffer.clear();
-    
-    Scene::getInstance().load("render-data/brdf-test-noal.obj", "standard");
-    
-    framebuffer.buffer.for_each([&](unsigned x, unsigned y) {
-										framebuffer.add(x, y, sample_pixel(camera, x, y));
-    								});
-
-    framebuffer.png().write("out.png");
+    Renderer renderer;
+    renderer.init("jobs/test");
+    renderer.run();
     return 0;
 }
+/*
 
 Color sample_pixel(Camera &camera, unsigned x, unsigned y) {
     Ray ray = camera.spawnRay(x, y);
     Color c(0, 0, 0);
+    TriangleIntersection closestIntersection;
     for (Triangle& triangle: Scene::getInstance().Triangles) {
         TriangleIntersection ti;
         ti = triangle.getIntersection(Scene::getInstance().Vertices.data(), ray);
-        if (ti.isValid()) {
+        if (ti.isValid() && ti.t<closestIntersection.t) {
+            closestIntersection = ti;
+            closestIntersection.triangle = &triangle;
             HitPoint hp(ti);
             c = hp.albedo();
             break;
@@ -46,3 +39,4 @@ Color sample_pixel(Camera &camera, unsigned x, unsigned y) {
     }
     return c;
 }
+*/
