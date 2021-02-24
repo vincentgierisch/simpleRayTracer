@@ -16,13 +16,15 @@ class Buffer {
             data = new T[w*h];
         }
         ~Buffer() {
-            delete [] data;
+            if (data != nullptr) {
+                delete [] data;
+            }
         }
 
         T& operator()(unsigned int x, unsigned int y) { return data[y*w + x]; }
         const T& operator()(unsigned x, unsigned y) const { return data[y*w + x]; }
 
-        Buffer& operator=(Buffer &&other) {
+        Buffer& operator=(Buffer &other) {
 		    std::swap(w, other.w);
 		    std::swap(h, other.h);
 		    std::swap(data, other.data);
@@ -51,6 +53,10 @@ class Framebuffer {
     public:
         Buffer<Color> buffer;
         Framebuffer(unsigned w, unsigned h): buffer(w, h) {};
+        Framebuffer& operator=(Framebuffer &&other) {
+            this->buffer = other.buffer;
+            return *this;
+        }
         ~Framebuffer(){}
         void clear();
         void add(unsigned x, unsigned y, Color c);

@@ -26,7 +26,9 @@ class Texture {
         }
 
         ~Texture() {
-            delete[] Texel;
+            if (this->Texel != nullptr) {
+                delete[] this->Texel;
+            }
         }
 
 };

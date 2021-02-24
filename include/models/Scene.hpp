@@ -13,6 +13,7 @@
 #include "gi/Texture.hpp"
 #include "../utils/Helper.hpp"
 #include "Color.hpp"
+#include "../gi/Camera.hpp"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -32,7 +33,8 @@ class Scene {
         static Scene& getInstance() {
             static Scene instance;
             return instance;
-        }
+        };
+        Camera camera;
         std::vector<Vertex> Vertices;
         std::vector<Triangle> Triangles;
         std::vector<Material> Materials;

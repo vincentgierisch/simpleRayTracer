@@ -1,18 +1,27 @@
-#ifndef RENDERER_HPP
-#define RENDERER_HPP
+#pragma once
 
-#include <vector>
-#include "Sphere.hpp"
-#include "Light.hpp"
-#include "Vec3.hpp"
+#include <string>
+#include <glm/glm.hpp>
+#include "utils/JobParser.hpp"
+#include "models/Scene.hpp"
 #include "Color.hpp"
-#include "Ray.hpp"
+#include "RayTracer.hpp"
+#include "models/HitPoint.hpp"
+#include "FrameBuffer.hpp"
+#include <vector>
+
+using namespace glm;
 
 class Renderer {
     private:
-        int _width, _height;
+        Framebuffer _framebuffer;
+        RayTracer _rayTracer;
+        unsigned int _width, _height, _sspx;
+        std::string _outPath;
+        Color getAverageColor(std::vector<Color> colors);
     public:
-        Renderer(int width, int height): _width(width), _height(height) {};
-        std::vector<Color> render(std::vector<Sphere>& spheres, std::vector<Light>& lights);
+        Renderer(): _framebuffer(0, 0) {};
+        void init(std::string jobPath);
+        void run();
+        std::vector<Color> sample_pixel(unsigned int x, unsigned int y);
 };
-#endif
