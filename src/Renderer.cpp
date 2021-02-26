@@ -25,6 +25,14 @@ void Renderer::init(std::string jobPath) {
     Scene::getInstance().camera = camera;
 
     Scene::getInstance().load(jd.ObjFilePath, "standard");
+
+    if (jd.Algorithm == "bvh") {
+        this->_rayTracer = new BvhRayTracer();
+    } else {
+        this->_rayTracer = new SeqRayTracer();
+    }
+
+    this->_rayTracer->init();
 }
 
 void Renderer::run() {
@@ -40,7 +48,7 @@ std::vector<Color> Renderer::sample_pixel(unsigned int x, unsigned int y) {
 
     for (unsigned int sample = 0; sample < this->_sspx; sample++){
         Ray ray = Scene::getInstance().camera.spawnRay(x, y, vec2(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX)));
-        TriangleIntersection intersection = this->_rayTracer.closest_hit(ray);
+        TriangleIntersection intersection = this->_rayTracer->closest_hit(ray);
         if (intersection.isValid()) {
             HitPoint hitPoint(intersection);
             result.push_back(hitPoint.albedo());

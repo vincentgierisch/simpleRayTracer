@@ -8,6 +8,7 @@
 
 class RayTracer {
     public:
-        TriangleIntersection any_hit(Ray& ray);
-        TriangleIntersection closest_hit(Ray& ray);
+        virtual void init() = 0;
+        virtual TriangleIntersection any_hit(Ray& ray) = 0;
+        virtual TriangleIntersection closest_hit(Ray& ray) = 0;
 };

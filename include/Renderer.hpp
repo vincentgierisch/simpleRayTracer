@@ -6,6 +6,8 @@
 #include "models/Scene.hpp"
 #include "Color.hpp"
 #include "RayTracer.hpp"
+#include "raytracer/Seq.hpp"
+#include "raytracer/Bvh.hpp"
 #include "models/HitPoint.hpp"
 #include "FrameBuffer.hpp"
 #include <vector>
@@ -15,7 +17,7 @@ using namespace glm;
 class Renderer {
     private:
         Framebuffer _framebuffer;
-        RayTracer _rayTracer;
+        RayTracer* _rayTracer;
         unsigned int _width, _height, _sspx;
         std::string _outPath;
         Color getAverageColor(std::vector<Color> colors);
@@ -24,4 +26,9 @@ class Renderer {
         void init(std::string jobPath);
         void run();
         std::vector<Color> sample_pixel(unsigned int x, unsigned int y);
+        ~Renderer() {
+            if (this->_rayTracer != nullptr) {
+                delete this->_rayTracer;
+            }
+        };
 };

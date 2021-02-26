@@ -1,6 +1,10 @@
-#include "../include/RayTracer.hpp"
+#include "../../include/raytracer/Seq.hpp"
 
-TriangleIntersection RayTracer::any_hit(Ray& ray){
+void SeqRayTracer::init(){
+    return;
+}
+
+TriangleIntersection SeqRayTracer::any_hit(Ray& ray){
     TriangleIntersection intersection;
     for (Triangle& triangle: Scene::getInstance().Triangles) {
         intersection = triangle.getIntersection(Scene::getInstance().Vertices.data(), ray);
@@ -11,7 +15,7 @@ TriangleIntersection RayTracer::any_hit(Ray& ray){
     return intersection;
 }
 
-TriangleIntersection RayTracer::closest_hit(Ray& ray){
+TriangleIntersection SeqRayTracer::closest_hit(Ray& ray){
     TriangleIntersection closestIntersection;
     for (Triangle& triangle: Scene::getInstance().Triangles) {
         TriangleIntersection intersection = triangle.getIntersection(Scene::getInstance().Vertices.data(), ray);
