@@ -2,9 +2,11 @@ at -10 -10 0
 look 1 0 0
 up 0 1 0
 
+algorithm bvh
+
 load render-data/sibenik/sibenik.obj
 sppx 1
-resolution 400 300
+resolution 480 360
 pointlight pos 0 -4 0 col 35 30 26
 pointlight pos 7 -8 0 col 7 4 2
-outfile outNoAliasing.png
+outfile highResNoAliasing2.png

@@ -20,7 +20,7 @@ $(TARGET): $(OBJECTS)
 	@echo " $(CC) $^ -o $(TARGET) $(LIB)"; $(CC) $^ -o $(TARGET) $(LIB)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
-	@mkdir -p $(BUILDDIR) $(BUILDDIR)/models $(BUILDDIR) $(BUILDDIR)/gi $(BUILDDIR)/utils
+	@mkdir -p $(BUILDDIR) $(BUILDDIR)/models $(BUILDDIR) $(BUILDDIR)/gi $(BUILDDIR)/utils $(BUILDDIR)/raytracer
 	@$(CC) $(CFLAGS) $(INC) -c -o $@ $< && echo "[OK] $@"
 
 clean:
