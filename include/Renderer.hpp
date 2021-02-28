@@ -7,7 +7,8 @@
 #include "Color.hpp"
 #include "RayTracer.hpp"
 #include "raytracer/Seq.hpp"
-#include "raytracer/Bvh.hpp"
+#include "raytracer/BinaryBvh.hpp"
+#include "raytracer/NaiveBvh.hpp"
 #include "models/HitPoint.hpp"
 #include "FrameBuffer.hpp"
 #include <vector>

@@ -27,7 +27,7 @@ void Renderer::init(std::string jobPath) {
     Scene::getInstance().load(jd.ObjFilePath, "standard");
 
     if (jd.Algorithm == "bvh") {
-        this->_rayTracer = new BvhRayTracer();
+        this->_rayTracer = new BinaryBvhRayTracer();
     } else {
         this->_rayTracer = new SeqRayTracer();
     }

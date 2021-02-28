@@ -4,15 +4,15 @@ void SeqRayTracer::init(){
     return;
 }
 
-TriangleIntersection SeqRayTracer::any_hit(Ray& ray){
+bool SeqRayTracer::any_hit(Ray& ray){
     TriangleIntersection intersection;
     for (Triangle& triangle: Scene::getInstance().Triangles) {
         intersection = triangle.getIntersection(Scene::getInstance().Vertices.data(), ray);
         if (intersection.isValid()) {
-            return intersection;
+            return true;
         }
     }
-    return intersection;
+    return false;
 }
 
 TriangleIntersection SeqRayTracer::closest_hit(Ray& ray){

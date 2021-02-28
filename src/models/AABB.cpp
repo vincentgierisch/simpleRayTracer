@@ -1,78 +1,39 @@
 #include "../../include/models/AABB.hpp"
 
 bool AABB::doesIntersect(Ray& ray, float& dist) {
-    float tmin = FLT_MIN;
-    float tmax = FLT_MAX;
 
-    if (ray.direction.x == 0) {
-        // ray points orthogonal to x axis
-        if (!(this->_min.x <= ray.origin.x && this->_max.x >= ray.origin.x)) {
-            // ray could not be in interval
-            return false;
-        }
-    } else {
-        tmin = (this->_min.x - ray.origin.x) / ray.direction.x;
-        tmax = (this->_max.x - ray.origin.x) / ray.direction.x;
+    float tempX1 = (this->_min.x - ray.origin.x) * ray.inverseDirection.x;
+    float tempX2 = (this->_max.x - ray.origin.x) * ray.inverseDirection.x;
 
-        if (tmin > tmax) {
-            std::swap(tmin, tmax);
-        }
-    }
+    float txmin = (tempX1 < tempX2) ? tempX1 : tempX2;
+    float txmax = (tempX2 > tempX1) ? tempX2 : tempX1;
+    
 
-    if (ray.direction.y == 0) {
-        // ray points orthogonal to y axis
-        if (!(this->_min.y <= ray.origin.y && this->_max.y >= ray.origin.y)) {
-            // ray could not be in interval
-            return false;
-        }
-    } else {
-        float tymin = (this->_min.y - ray.origin.y) / ray.direction.y;
-        float tymax = (this->_max.y - ray.origin.y) / ray.direction.y;
+    float tempY1 = (this->_min.y - ray.origin.y) * ray.inverseDirection.y;
+    float tempY2 = (this->_max.y - ray.origin.y) * ray.inverseDirection.y;
 
-        if (tymin > tymax) {
-            std::swap(tymin, tymax);
-        }
+    float tymin = (tempY1 < tempY2) ? tempY1 : tempY2;
+    float tymax = (tempY2 > tempY1) ? tempY2 : tempY1;
+    
 
-        if ((tmin > tymax) || (tymin > tmax))
-            return false;
+    float tempZ1 = (this->_min.z - ray.origin.z) * ray.inverseDirection.z;
+    float tempZ2 = (this->_max.z - ray.origin.z) * ray.inverseDirection.z;
 
-        if (tymax < FLT_MIN || tymin > FLT_MAX)
-			return false;
+    float tzmin = (tempZ1 < tempZ2) ? tempZ1 : tempZ2;
+    float tzmax = (tempZ2 > tempZ1) ? tempZ2 : tempZ1;
 
-        if (tymin > tmin)
-            tmin = tymin;
+    float maxTMin = (txmin > tymin) ? txmin : tymin;
+    maxTMin = (maxTMin > tzmin) ? maxTMin : tzmin;
 
-        if (tymax < tmax)
-            tmax = tymax;
-    }
+    float minTMax = (txmax < tymax) ? txmax : tymax;
+    minTMax = (minTMax < tzmax) ? minTMax : tzmax;
 
-    if (ray.direction.z == 0) {
-        // ray points orthogonal to y axis
-        if (!(this->_min.z <= ray.origin.z && this->_max.z >= ray.origin.z)) {
-            // ray could not be in interval
-            return false;
-        }
-    } else {
-        float tzmin = (this->_min.z - ray.origin.z) / ray.direction.z;
-        float tzmax = (this->_max.z - ray.origin.z) / ray.direction.z;
+    if (maxTMin > minTMax)
+        return false;
 
-        if (tzmin > tzmax) {
-            std::swap(tzmin, tzmax);
-        }
-
-        if ((tmin > tzmax) || (tzmin > tmax))
-            return false;
-
-        if (tzmax < FLT_MIN || tzmin > FLT_MAX)
-			return false;
-
-        if (tzmin > tmin)
-            tmin = tzmin;
-
-        if (tzmax < tmax)
-            tmax = tzmax;
-    }
-
-    dist = tmin;
+    if (minTMax < FLT_MIN || maxTMin > FLT_MAX)
+        return false;
+    
+    dist = maxTMin;
     return true;
 }

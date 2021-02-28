@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <functional>
 #include "Color.hpp"
-#include "Vec3.hpp"
 
 template<typename T> 
 class Buffer {

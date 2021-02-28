@@ -1,11 +1,11 @@
-#include "../../include/raytracer/Bvh.hpp"
+#include "../../include/raytracer/NaiveBvh.hpp"
 
-unsigned int BvhRayTracer::subdivide(std::vector<Triangle> &triangles, std::vector<Vertex> &vertices, unsigned int start, unsigned int end) {
+unsigned int NaiveBvhRayTracer::subdivide(std::vector<Triangle> &triangles, std::vector<Vertex> &vertices, unsigned int start, unsigned int end) {
     assert(start < end);
     // Abort recursion
     if (end - start == 1) {
         unsigned int id = this->_bvhNodes.size();
-        BvhNode bvhNode;
+        NaiveBvhNode bvhNode;
         bvhNode.triangle = start;
         this->_bvhNodes.push_back(bvhNode);
         return id;
@@ -14,7 +14,7 @@ unsigned int BvhRayTracer::subdivide(std::vector<Triangle> &triangles, std::vect
     // get box for part scene
     AABB box;
     for(unsigned int i = start; i < end; ++i) {
-        box.grow(this->getBoxFromTriangle(vertices, triangles[i]));
+        box.grow(raytracer::Helper::getBoxFromTriangle(vertices, triangles[i]));
     }
 
     // sort triangles by largest axis
@@ -22,13 +22,13 @@ unsigned int BvhRayTracer::subdivide(std::vector<Triangle> &triangles, std::vect
     float largest = max(extent.x, max(extent.y, extent.z));
     if (largest == extent.x) {
         std::sort(triangles.data()+start, triangles.data()+end,
-            [&](const Triangle &a, const Triangle &b) {return this->getCenter(vertices, a).x < this->getCenter(vertices, b).x; });
+            [&](const Triangle &a, const Triangle &b) {return raytracer::Helper::getCenter(vertices, a).x < raytracer::Helper::getCenter(vertices, b).x; });
     } else if (largest == extent.y) {
         std::sort(triangles.data()+start, triangles.data()+end,
-            [&](const Triangle &a, const Triangle &b) {return this->getCenter(vertices, a).y < this->getCenter(vertices, b).y; });
+            [&](const Triangle &a, const Triangle &b) {return raytracer::Helper::getCenter(vertices, a).y < raytracer::Helper::getCenter(vertices, b).y; });
     } else if (largest == extent.z) {
         std::sort(triangles.data()+start, triangles.data()+end,
-            [&](const Triangle &a, const Triangle &b) {return this->getCenter(vertices, a).z < this->getCenter(vertices, b).z; });
+            [&](const Triangle &a, const Triangle &b) {return raytracer::Helper::getCenter(vertices, a).z < raytracer::Helper::getCenter(vertices, b).z; });
     }
 
     // cut in the middle
@@ -43,34 +43,38 @@ unsigned int BvhRayTracer::subdivide(std::vector<Triangle> &triangles, std::vect
     return id;
 }
 
-AABB BvhRayTracer::getBoxFromTriangle(std::vector<Vertex> &vertices, Triangle& triangle) {
-    AABB box;
-    box.grow(vertices[triangle.a].pos);
-    box.grow(vertices[triangle.b].pos);
-    box.grow(vertices[triangle.c].pos);
-    return box;
-}
-
-vec3 BvhRayTracer::getCenter(std::vector<Vertex> &vertices, const Triangle& triangle) {
-    return (
-        vertices[triangle.a].pos +
-        vertices[triangle.b].pos +
-        vertices[triangle.c].pos
-    ) * 0.333333f;
-}
-
-
-void BvhRayTracer::init() {
+void NaiveBvhRayTracer::init() {
     std::cout << "Building BVH..." << std::endl; 
     this->_root = this->subdivide(Scene::getInstance().Triangles, Scene::getInstance().Vertices, 0, Scene::getInstance().Triangles.size());
     std::cout << "Done building BVH..." << std::endl; 
 }
 
-TriangleIntersection BvhRayTracer::any_hit(Ray& ray) {
+bool NaiveBvhRayTracer::any_hit(Ray& ray) {
+    unsigned int stack[24];
+    int stackPointer = 0;
+    stack[0] = this->_root;
 
+    while (stackPointer >= 0) {
+        NaiveBvhNode node = this->_bvhNodes[stack[stackPointer]];
+        --stackPointer;
+
+        if (!node.isLeaf()) {
+            float dist;
+            if (node.aabb.doesIntersect(ray, dist)) {
+                stack[++stackPointer] = node.leftNode;
+                stack[++stackPointer] = node.rightNode;
+            }
+        } else {
+            TriangleIntersection intersection = Scene::getInstance().Triangles[node.triangle].getIntersection(Scene::getInstance().Vertices.data(), ray);
+            if (intersection.isValid()) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
-TriangleIntersection BvhRayTracer::closest_hit(Ray& ray) {
+TriangleIntersection NaiveBvhRayTracer::closest_hit(Ray& ray) {
     TriangleIntersection closestIntersection;
 
     unsigned int stack[24];
@@ -78,7 +82,8 @@ TriangleIntersection BvhRayTracer::closest_hit(Ray& ray) {
     stack[0] = this->_root;
 
     while (stackPointer >= 0) {
-        BvhNode node = this->_bvhNodes[stack[stackPointer--]];
+        NaiveBvhNode node = this->_bvhNodes[stack[stackPointer]];
+        --stackPointer;
 
         if (!node.isLeaf()) {
             float dist;
