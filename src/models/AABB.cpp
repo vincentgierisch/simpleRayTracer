@@ -31,7 +31,7 @@ bool AABB::doesIntersect(Ray& ray, float& dist) {
     if (maxTMin > minTMax)
         return false;
 
-    if (minTMax < FLT_MIN || maxTMin > FLT_MAX)
+    if (minTMax < ray.tMin || maxTMin > ray.tMax)
         return false;
     
     dist = maxTMin;

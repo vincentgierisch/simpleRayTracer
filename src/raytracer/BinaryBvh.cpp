@@ -87,6 +87,7 @@ void BinaryBvhRayTracer::init() {
     std::cout << "Building BVH..." << std::endl; 
     this->_root = this->subdivide(Scene::getInstance().Triangles, Scene::getInstance().Vertices, 0, Scene::getInstance().Triangles.size());
     std::cout << "Done building BVH..." << std::endl; 
+    std::cout << "BvhStack: " << this->_bvhNodes.size() << std::endl;
 }
 
 bool BinaryBvhRayTracer::any_hit(Ray& ray) {
@@ -129,18 +130,21 @@ bool BinaryBvhRayTracer::any_hit(Ray& ray) {
 TriangleIntersection BinaryBvhRayTracer::closest_hit(Ray& ray) {
     TriangleIntersection closestIntersection;
 
-    unsigned int stack[24];
+    unsigned int stack[25];
     int stackPointer = 0;
     stack[0] = this->_root;
 
-    while (stackPointer >= 0) {
-        BinaryBvhNode node = this->_bvhNodes[stack[stackPointer]];
-        --stackPointer;
+    unsigned int hits = 0;
 
-        if (!node.isLeaf()) {
+    while (stackPointer >= 0) {
+        BinaryBvhNode node = this->_bvhNodes[stack[stackPointer--]];
+        //--stackPointer;
+        hits++;
+
+        if (node.triangle == -1) {
             float leftDist, rightDist;
-            bool hitLeft = node.leftBox.doesIntersect(ray, leftDist);
-            bool hitRight = node.rightBox.doesIntersect(ray, rightDist);
+            bool hitLeft = node.leftBox.doesIntersect(ray, leftDist) && leftDist < closestIntersection.t;
+            bool hitRight = node.rightBox.doesIntersect(ray, rightDist) && rightDist < closestIntersection.t;
 
             if (hitLeft && hitRight) {
                 if (leftDist < rightDist) {
@@ -156,12 +160,15 @@ TriangleIntersection BinaryBvhRayTracer::closest_hit(Ray& ray) {
                 stack[++stackPointer] = node.rightNode;
             }
         } else {
+            //std::cout << "Leaf: " << node.triangle << std::endl;
             TriangleIntersection intersection = Scene::getInstance().Triangles[node.triangle].getIntersection(Scene::getInstance().Vertices.data(), ray);
             if (intersection.isValid() && intersection.t < closestIntersection.t) {
                 closestIntersection = intersection;
                 closestIntersection.triangle = &Scene::getInstance().Triangles[node.triangle];
+                //std::cout << "Intersection found: " << node.triangle << std::endl;
             }
         }
     }
+	// std::cout << "AABB Hits: " << hits << std::endl;
     return closestIntersection;
 }

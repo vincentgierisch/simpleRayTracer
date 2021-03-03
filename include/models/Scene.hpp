@@ -7,6 +7,7 @@
 #include <math.h>
 #include <png++/png.hpp>
 #include <glm/glm.hpp>
+#include <map>
 
 #include "Primitives.hpp"
 #include "gi/Material.hpp"
@@ -14,6 +15,8 @@
 #include "../utils/Helper.hpp"
 #include "Color.hpp"
 #include "../gi/Camera.hpp"
+#include "Pointlight.hpp"
+#include "gi/Brdf.hpp"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -39,6 +42,9 @@ class Scene {
         std::vector<Triangle> Triangles;
         std::vector<Material> Materials;
         std::vector<Texture*> Textures;
-        void load(const std::string path, const std::string &name, const glm::mat4 &trafo = glm::mat4());
+        std::vector<Pointlight> Pointlights;
+        std::map<BrdfType, Brdf*> Brdfs;
+        BrdfType DefaultBrdfType;
+        void load(const std::string pat);
         ~Scene();
 };

@@ -29,7 +29,7 @@ TriangleIntersection Triangle::getIntersection(const Vertex* vertices, const Ray
 	gamma /= M;
 	tt /= M;
 
-    if (tt > FLT_MIN && tt < FLT_MAX
+    if (tt > ray.tMin && tt < ray.tMax
         && (beta > 0) 
         && (gamma > 0) 
         && (beta + gamma) <= 1) {

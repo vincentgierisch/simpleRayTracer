@@ -45,8 +45,10 @@ JobData JobParser::parse(std::string path) {
             pld.Position = position;
             pld.Color = color;
             jd.PointLights.push_back(pld);
-        } else if (command == "algorithm") {
-            in >> jd.Algorithm;
+        } else if (command == "raytracer") {
+            in >> jd.RayTracer;
+        } else if (command == "default-brdf") {
+            in >> jd.DefaultBrdf;
         } else if (command == "") {
         } else if (command[0] == '#') {
         } else {

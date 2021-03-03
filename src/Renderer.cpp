@@ -7,7 +7,25 @@ Color Renderer::getAverageColor(std::vector<Color> colors){
         averageColor.green += color.green;
         averageColor.blue += color.blue;
     }
-    return averageColor / this->_sspx;
+    return averageColor / colors.size();
+}
+
+Color Renderer::calculateAlbedo(HitPoint& hitpoint, Ray& r) {
+    std::vector<Color> colors;
+    for (Pointlight& pointlight : Scene::getInstance().Pointlights) {
+        Color resultColor(0, 0, 0);
+        vec3 topoint = pointlight.Position - hitpoint.x;
+        vec3 wi = normalize(topoint);
+        Ray shadowRay(hitpoint.x, wi);
+        float distance = sqrtf(powf(topoint.x, 2) + powf(topoint.y, 2) + powf(topoint.z, 2));
+        shadowRay.setMax(distance);
+        if(!this->_rayTracer->any_hit(shadowRay)) {
+            vec3 c = color_to_glm(hitpoint.albedo()) * color_to_glm(pointlight.Power) * 4.0f * float(M_PI) * hitpoint.material->brdf->f(hitpoint.x, wi, r.direction) / (distance * distance);
+            resultColor = glm_to_color(c);
+        }
+        colors.push_back(resultColor);
+    }
+    return this->getAverageColor(colors);
 }
 
 void Renderer::init(std::string jobPath) {
@@ -21,12 +39,21 @@ void Renderer::init(std::string jobPath) {
     this->_framebuffer.clear();
 
     //init Scene
+    Scene& scene = Scene::getInstance();
     Camera camera(jd.CameraPosition, jd.CameraDirection, jd.CameraUp, 65, jd.Resolution.x, jd.Resolution.y);
-    Scene::getInstance().camera = camera;
+    scene.camera = camera;
+    scene.DefaultBrdfType = (BrdfType) jd.DefaultBrdf;
+    scene.Brdfs.emplace(std::make_pair(scene.DefaultBrdfType, BrdfFabric::getBrdf(scene.DefaultBrdfType)));
 
-    Scene::getInstance().load(jd.ObjFilePath, "standard");
 
-    if (jd.Algorithm == "bvh") {
+    for (JobData::PointLightData& pld : jd.PointLights) {
+        Pointlight pl(pld.Position, glm_to_color(pld.Color));
+        scene.Pointlights.push_back(pl);
+    }
+
+    scene.load(jd.ObjFilePath);
+
+    if (jd.RayTracer == "bvh") {
         this->_rayTracer = new BinaryBvhRayTracer();
     } else {
         this->_rayTracer = new SeqRayTracer();
@@ -47,12 +74,14 @@ std::vector<Color> Renderer::sample_pixel(unsigned int x, unsigned int y) {
     std::vector<Color> result;
 
     for (unsigned int sample = 0; sample < this->_sspx; sample++){
+        Color sampleColor(0, 0, 0);
         Ray ray = Scene::getInstance().camera.spawnRay(x, y, vec2(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX)));
         TriangleIntersection intersection = this->_rayTracer->closest_hit(ray);
         if (intersection.isValid()) {
             HitPoint hitPoint(intersection);
-            result.push_back(hitPoint.albedo());
+            sampleColor = this->calculateAlbedo(hitPoint, ray);
         }
+        result.push_back(sampleColor);
     }
 
     return result;

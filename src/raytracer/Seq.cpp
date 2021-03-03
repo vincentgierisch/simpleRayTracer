@@ -4,10 +4,9 @@ void SeqRayTracer::init(){
     return;
 }
 
-bool SeqRayTracer::any_hit(Ray& ray){
-    TriangleIntersection intersection;
+bool SeqRayTracer::any_hit(Ray& ray) {
     for (Triangle& triangle: Scene::getInstance().Triangles) {
-        intersection = triangle.getIntersection(Scene::getInstance().Vertices.data(), ray);
+        TriangleIntersection intersection = triangle.getIntersection(Scene::getInstance().Vertices.data(), ray);
         if (intersection.isValid()) {
             return true;
         }

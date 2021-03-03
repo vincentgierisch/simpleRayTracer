@@ -13,7 +13,7 @@ class AABB {
     private:
         vec3 _min, _max;
     public:
-        AABB(): _min(vec3(0)), _max(vec3(0)) {};
+        AABB(): _min(vec3(FLT_MAX)), _max(vec3(-FLT_MAX)) {};
         AABB(vec3 min, vec3 max): _min(min), _max(max) {};
         bool doesIntersect(Ray& ray, float& dist);
         inline vec3 getMin() { return this->_min; };

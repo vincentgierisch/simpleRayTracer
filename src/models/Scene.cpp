@@ -24,7 +24,7 @@ Texture* Scene::loadTexture(std::string path){
     return texture;
 }
 
-void Scene::load(const std::string path, const std::string &name, const mat4 &trafo) {
+void Scene::load(const std::string path) {
     Assimp::Importer importer;
 
     unsigned int flags = aiProcess_Triangulate | aiProcess_GenNormals;  // | aiProcess_FlipUVs  // TODO assimp
@@ -44,14 +44,18 @@ void Scene::load(const std::string path, const std::string &name, const mat4 &tr
         // will be roughness or index of refraction
         float tmp;
 
-        if (mat_ai->Get(AI_MATKEY_COLOR_DIFFUSE,  col) == AI_SUCCESS) colorDiffuse = Color(col.r, col.g, col.b, 1.0f);
-		if (mat_ai->Get(AI_MATKEY_COLOR_SPECULAR, col) == AI_SUCCESS) colorSpecular = Color(col.r, col.g, col.b, 1.0f);
-		if (mat_ai->Get(AI_MATKEY_COLOR_EMISSIVE, col) == AI_SUCCESS) colorEmissive = Color(col.r, col.g, col.b, 1.0f);
+        if (mat_ai->Get(AI_MATKEY_COLOR_DIFFUSE,  col) == AI_SUCCESS) colorDiffuse = Color(col.r, col.g, col.b);
+		if (mat_ai->Get(AI_MATKEY_COLOR_SPECULAR, col) == AI_SUCCESS) colorSpecular = Color(col.r, col.g, col.b);
+		if (mat_ai->Get(AI_MATKEY_COLOR_EMISSIVE, col) == AI_SUCCESS) colorEmissive = Color(col.r, col.g, col.b);
 		if (mat_ai->Get(AI_MATKEY_SHININESS,      tmp) == AI_SUCCESS) material.roughness = Helper::roughness_from_exponent(tmp);
 		if (mat_ai->Get(AI_MATKEY_REFRACTI,       tmp) == AI_SUCCESS) material.ior = tmp;
-		if (luma(colorDiffuse) > 1e-4) material.albedo = colorDiffuse;
-		else                 material.albedo = colorSpecular;
-		material.albedo = glm_to_color(pow(color_to_glm(material.albedo), vec3(2.2f, 2.2f, 2.2f)));
+		
+        if (luma(colorDiffuse) > 1e-4)
+            material.albedo = colorDiffuse;
+		else
+            material.albedo = colorSpecular;
+		
+        material.albedo = material.albedo * 255.0f;
 		material.emissive = colorEmissive;
 
         // Load image
@@ -63,6 +67,7 @@ void Scene::load(const std::string path, const std::string &name, const mat4 &tr
             Textures.push_back(material.albedo_tex);
         }
 
+        material.brdf = this->Brdfs[this->DefaultBrdfType];
         this->Materials.push_back(material);
     }
 
@@ -104,8 +109,9 @@ void Scene::load(const std::string path, const std::string &name, const mat4 &tr
                 std::cout << "WARN: Mesh: skipping non-triangle [" << face.mNumIndices << "] face (that the ass imp did not triangulate)!" << std::endl;
             }
         }
-
     }
+
+    std::cout << "Triangle count: " << this->Triangles.size() << std::endl;
 }
 
 Scene::~Scene(){
@@ -113,5 +119,9 @@ Scene::~Scene(){
         if (texture != nullptr) {
             delete texture;
         }
+    }
+
+    for (std::pair<const BrdfType, Brdf*>& p : this->Brdfs) {
+        delete p.second;
     }
 }

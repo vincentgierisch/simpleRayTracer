@@ -14,7 +14,7 @@ class NaiveBvhNode {
 class BinaryBvhNode {
     public:
         AABB leftBox, rightBox;
-        unsigned int leftNode, rightNode;
-        unsigned int triangle = UINT32_MAX;
-        bool isLeaf() { return triangle != UINT32_MAX; };
+        int leftNode, rightNode;
+        int triangle = -1;
+        bool isLeaf() { return triangle != -1; };
 };

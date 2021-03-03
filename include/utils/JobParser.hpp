@@ -17,11 +17,11 @@ struct JobData {
         vec3 Color;
     };
     
-
+    short DefaultBrdf;
     vec3 CameraPosition;
     vec3 CameraDirection;
     vec3 CameraUp;
-    std::string Algorithm;
+    std::string RayTracer;
     std::string ObjFilePath;
     vec2 Resolution;
     unsigned int SamplesPerPixel;

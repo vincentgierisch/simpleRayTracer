@@ -9,7 +9,7 @@ class TriangleIntersection {
         float t, beta, gamma;
         Triangle* triangle;
         TriangleIntersection(): t(FLT_MAX) {};
-        bool isValid() {
+        inline bool isValid() {
             return t != FLT_MAX;
         }
 };
