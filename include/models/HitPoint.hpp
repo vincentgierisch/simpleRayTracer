@@ -1,17 +1,16 @@
 #pragma once
 
-#include "../Color.hpp"
 #include "../gi/Material.hpp"
+#include "../Color.hpp"
 #include "Primitives.hpp"
 #include "TriangleIntersection.hpp"
 #include "Scene.hpp"
 
-class HitPoint
-{
+class HitPoint {
     private:
-        /* data */
+
     public:
-        vec3 x;
+        vec3 x, norm;
         vec2 textureCoordinate;
         Material* material;
         uint32_t triangleReference;

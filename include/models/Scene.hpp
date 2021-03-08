@@ -9,21 +9,21 @@
 #include <glm/glm.hpp>
 #include <map>
 
+#include "gi/BrdfType.hpp"
 #include "Primitives.hpp"
+#include "gi/Brdf.hpp"
 #include "gi/Material.hpp"
 #include "gi/Texture.hpp"
 #include "../utils/Helper.hpp"
 #include "Color.hpp"
 #include "../gi/Camera.hpp"
 #include "Pointlight.hpp"
-#include "gi/Brdf.hpp"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <assimp/mesh.h>
 #include <assimp/material.h>
-
 
 class Scene {
     private:

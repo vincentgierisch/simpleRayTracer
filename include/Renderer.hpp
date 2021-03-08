@@ -3,6 +3,7 @@
 #include <string>
 #include <glm/glm.hpp>
 #include "utils/JobParser.hpp"
+#include "models/HitPoint.hpp"
 #include "models/Scene.hpp"
 #include "models/Pointlight.hpp"
 #include "Color.hpp"
@@ -10,7 +11,6 @@
 #include "raytracer/Seq.hpp"
 #include "raytracer/BinaryBvh.hpp"
 #include "raytracer/NaiveBvh.hpp"
-#include "models/HitPoint.hpp"
 #include "FrameBuffer.hpp"
 #include <vector>
 

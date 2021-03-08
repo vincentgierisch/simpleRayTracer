@@ -1,9 +1,11 @@
 #pragma once
 
-#include "Brdf.hpp"
+//#include "Brdf.hpp"
 #include "Texture.hpp"
 #include "../Color.hpp"
 #include <math.h>
+
+class Brdf;
 
 class Material {
     public:

@@ -1,0 +1,19 @@
+#at -10 -10 0
+#look 1 0 0
+#up 0 1 0
+
+at -13 -13 0
+look 1 0 0
+up 0 1 0
+
+raytracer bvh
+
+load render-data/sibenik/sibenik.obj
+sppx 10
+resolution 720 480
+#pointlight pos 0 -4 0 col 35 30 26
+pointlight pos 7 -8 0 col 18 15 13
+
+default-brdf 2
+
+outfile outLayered.png
