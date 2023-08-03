@@ -14,18 +14,22 @@ class Brdf {
     public:
         const float OneOverPi = (1.0f / M_PI);
         float fresnel (float cosThetaI, float n1, float n2);
-        virtual float f(HitPoint& hp, vec3 wi, vec3 wo) = 0;
+        inline float cdot(const vec3 &a, const vec3 &b) {
+            float x = a.x*b.x + a.y*b.y + a.z*b.z;
+            return x < 0.0f ? 0.0f : x;
+        }
+        virtual vec3 f(HitPoint& hp, vec3 wi, vec3 wo) = 0;
 };
 
 class LambertianBrdf : public Brdf {
     public:
-        float f(HitPoint& hp, vec3 wi, vec3 wo) override;
+        vec3 f(HitPoint& hp, vec3 wi, vec3 wo) override;
 }; 
 
 
 class PhongBrdf : public Brdf {
     public:
-        float f(HitPoint& hp, vec3 wi, vec3 wo) override;
+        vec3 f(HitPoint& hp, vec3 wi, vec3 wo) override;
 };
 
 class LayeredBrdf : public Brdf {
@@ -34,7 +38,7 @@ class LayeredBrdf : public Brdf {
         Brdf* Coat;
     public:
         LayeredBrdf(Brdf* core, Brdf* coat): Core(core), Coat(coat) {};
-        float f(HitPoint& hp, vec3 wi, vec3 wo) override;
+        vec3 f(HitPoint& hp, vec3 wi, vec3 wo) override;
         ~LayeredBrdf() {
             delete Core;
             delete Coat;

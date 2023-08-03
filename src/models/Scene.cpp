@@ -7,7 +7,7 @@ void Scene::getPixelsFromPng(png::image<png::rgb_pixel> image, Color* storage){
     unsigned int height = image.get_height();
     for (int i = 0; i < (width * height); i++) {
         png::rgb_pixel& pixel = image[i / width][i % width];
-        storage[i] = Color(pixel.red, pixel.green, pixel.blue);
+        storage[i] = Color(pixel.red, pixel.green, pixel.blue) / 255.0f;
     }
 }
 
@@ -55,7 +55,7 @@ void Scene::load(const std::string path) {
 		else
             material.albedo = colorSpecular;
 		
-        material.albedo = material.albedo * 255.0f;
+        material.albedo = glm_to_color(pow(color_to_glm(material.albedo), vec3(2.2f, 2.2f, 2.2f)));
 		material.emissive = colorEmissive;
 
         // Load image

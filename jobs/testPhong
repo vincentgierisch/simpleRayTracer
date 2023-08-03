@@ -9,10 +9,9 @@ up 0 1 0
 raytracer bvh
 
 load render-data/sibenik/sibenik.obj
-sppx 10
-resolution 720 480
-#pointlight pos 0 -4 0 col 35 30 26
-pointlight pos 7 -8 0 col 18 15 13
+sppx 32
+resolution 1280 720
+pointlight pos 7 -8 0 col 7 4 2
 
 default-brdf 1
 

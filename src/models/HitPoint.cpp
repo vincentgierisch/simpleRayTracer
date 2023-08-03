@@ -15,7 +15,7 @@ HitPoint::HitPoint(TriangleIntersection& ti) {
     this->x = (1.0f - ti.beta - ti.gamma)*a.pos + ti.beta*b.pos + ti.gamma*c.pos;
     this->textureCoordinate = (1.0f - ti.beta - ti.gamma)*a.textureCoordinate + ti.beta*b.textureCoordinate + ti.gamma*c.textureCoordinate;
     this->material = &Scene::getInstance().Materials[ti.triangle->material_id];
-    this->norm = normalize((a.norm + b.norm + c.norm) / 3.0f);
+    this->norm = normalize((a.norm + b.norm + c.norm));
 }
 
 Color HitPoint::albedo() {

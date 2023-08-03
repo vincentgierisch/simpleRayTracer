@@ -11,18 +11,27 @@ float Brdf::fresnel(float cosThetaI, float n1, float n2) {
     return 0.5f * (Rs + Rp);
 }
 
-float LambertianBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
-    return OneOverPi;
+vec3 LambertianBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
+    return OneOverPi * color_to_glm(hp.albedo());
 }
 
-float PhongBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
+vec3 PhongBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
+    if (dot(wi, hp.norm) <= 0) return vec3(0);
+    /*
     float exp = Helper::exponent_from_roughness(hp.material->roughness);
     vec3 wr = 2.0f * hp.norm * dot(wi, hp.norm) - wi;
     float cos_a = powf(dot(wr, wo), exp);
-    return (cos_a * (exp + 1.0f)) / (2.0f * M_PI);
+    return ((cos_a * (exp + 1.0f)) / (2.0f * M_PIf32)) * color_to_glm(hp.albedo());
+    */
+	float exponent = Helper::exponent_from_roughness(hp.material->roughness);
+	vec3 r = 2.0f*hp.norm*dot(wi,hp.norm)-wi;
+	float cos_theta = this->cdot(wo, r);
+	const float norm_f = (exponent + 2.0f) * (1.0f / (2.0f * M_PI));
+	return color_to_glm(hp.albedo()) * powf(cos_theta, exponent) * norm_f * this->cdot(wi,hp.norm);
 }
 
-float LayeredBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
-    float R = this->fresnel(dot(hp.norm, wo), 1.0f, hp.material->ior);
-    return R*this->Coat->f(hp, wi, wo) + (1 - R) * this->Core->f(hp, wi, wo);
+vec3 LayeredBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
+    float R = this->fresnel(this->cdot(hp.norm, wo), 1.0f, hp.material->ior);
+    return (R*this->Coat->f(hp, wi, wo) + (1 - R) * this->Core->f(hp, wi, wo)) * color_to_glm(hp.albedo());
+    return this->Core->f(hp, wi, wo) + this->Coat->f(hp, wi, wo);
 }

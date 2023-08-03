@@ -17,11 +17,12 @@ Color Renderer::calculateAlbedo(HitPoint& hitpoint, Ray& r) {
         vec3 topoint = pointlight.Position - hitpoint.x;
         vec3 wi = normalize(topoint);
         Ray shadowRay(hitpoint.x, wi);
-        float distance = sqrtf(powf(topoint.x, 2) + powf(topoint.y, 2) + powf(topoint.z, 2));
+        float distance = sqrtf(dot(topoint, topoint));
         shadowRay.setMax(distance);
         if(!this->_rayTracer->any_hit(shadowRay)) {
-            vec3 c = color_to_glm(hitpoint.albedo()) * color_to_glm(pointlight.Power) * 4.0f * float(M_PI) * hitpoint.material->brdf->f(hitpoint, wi, -r.direction) / (distance * distance);
-            resultColor = glm_to_color(c);
+            //std::cout << "albedo: " << hitpoint.albedo().red << std::endl;
+            vec3 c = pointlight.getPower() * hitpoint.material->brdf->f(hitpoint, wi, -r.direction) / (distance * distance);
+            return glm_to_color(c);
         }
         colors.push_back(resultColor);
     }
