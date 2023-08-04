@@ -24,11 +24,10 @@ vec3 PhongBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
     return ((cos_a * (exp + 1.0f)) / (2.0f * M_PIf32)) * color_to_glm(hp.albedo());
     */
 	float exponent = Helper::exponent_from_roughness(hp.material->roughness);
-	vec3 r = 2.0f*hp.norm*dot(wi,hp.norm)-wi;
-	float cos_theta = this->cdot(wo, r);
-	const float norm_f = (exponent + 2.0f) * (1.0f / (2.0f * M_PI));
+	vec3 wr = 2.0f*hp.norm*dot(wi,hp.norm)-wi;
+	// const float norm_f = (exponent + 2.0f) * (1.0f / (2.0f * M_PI));
 	// return color_to_glm(hp.albedo()) * powf(cos_theta, exponent) * norm_f * this->cdot(wi,hp.norm);
-    return color_to_glm(hp.albedo()) * powf(cos_theta, exponent);
+    return (float)(powf(dot(wr, wo), exponent) / (2.0f * M_PIf32)) * color_to_glm(hp.albedo());
 }
 
 vec3 LayeredBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
