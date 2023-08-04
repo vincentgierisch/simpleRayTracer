@@ -14,10 +14,10 @@ Color Renderer::calculateAlbedo(HitPoint& hitpoint, Ray& r) {
     std::vector<Color> colors;
     for (Pointlight& pointlight : Scene::getInstance().Pointlights) {
         Color resultColor(0, 0, 0);
-        vec3 topoint = pointlight.Position - hitpoint.x;
-        vec3 wi = normalize(topoint);
+        vec3 toPoint = pointlight.Position - hitpoint.x;
+        vec3 wi = normalize(toPoint);
         Ray shadowRay(hitpoint.x, wi);
-        float distance = sqrtf(dot(topoint, topoint));
+        float distance = sqrtf(dot(toPoint, toPoint));
         shadowRay.setMax(distance);
         if(!this->_rayTracer->any_hit(shadowRay)) {
             //std::cout << "albedo: " << hitpoint.albedo().red << std::endl;

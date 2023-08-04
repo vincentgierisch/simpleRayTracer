@@ -11,4 +11,5 @@ class RayTracer {
         virtual void init() = 0;
         virtual bool any_hit(Ray& ray) = 0;
         virtual TriangleIntersection closest_hit(Ray& ray) = 0;
+        virtual ~RayTracer() = default;
 };

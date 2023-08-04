@@ -27,7 +27,8 @@ vec3 PhongBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
 	vec3 r = 2.0f*hp.norm*dot(wi,hp.norm)-wi;
 	float cos_theta = this->cdot(wo, r);
 	const float norm_f = (exponent + 2.0f) * (1.0f / (2.0f * M_PI));
-	return color_to_glm(hp.albedo()) * powf(cos_theta, exponent) * norm_f * this->cdot(wi,hp.norm);
+	// return color_to_glm(hp.albedo()) * powf(cos_theta, exponent) * norm_f * this->cdot(wi,hp.norm);
+    return color_to_glm(hp.albedo()) * powf(cos_theta, exponent);
 }
 
 vec3 LayeredBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {

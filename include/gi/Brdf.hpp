@@ -19,6 +19,7 @@ class Brdf {
             return x < 0.0f ? 0.0f : x;
         }
         virtual vec3 f(HitPoint& hp, vec3 wi, vec3 wo) = 0;
+        virtual ~Brdf() = default;
 };
 
 class LambertianBrdf : public Brdf {

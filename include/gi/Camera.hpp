@@ -38,6 +38,8 @@ class Camera{
         }
 };
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsequence-point"
 inline void test_camrays(Camera &camera, int stride) {
 	std::ofstream out("test.obj");
 	int i = 1;
@@ -49,3 +51,4 @@ inline void test_camrays(Camera &camera, int stride) {
 			out << "l " << i++ << " " << i++ << std::endl;
 		}
 }
+#pragma GCC diagnostic pop
