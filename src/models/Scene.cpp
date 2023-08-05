@@ -5,6 +5,7 @@ inline vec3 to_glm(const aiVector3D& v) { return vec3(v.x, v.y, v.z); }
 void Scene::getPixelsFromPng(png::image<png::rgb_pixel> image, Color* storage){
     unsigned int width = image.get_width();
     unsigned int height = image.get_height();
+    #pragma omp parallel for
     for (int i = 0; i < (width * height); i++) {
         png::rgb_pixel& pixel = image[i / width][i % width];
         storage[i] = Color(pixel.red, pixel.green, pixel.blue) / 255.0f;
@@ -27,11 +28,13 @@ Texture* Scene::loadTexture(std::string path){
 void Scene::load(const std::string path) {
     Assimp::Importer importer;
 
-    unsigned int flags = aiProcess_Triangulate | aiProcess_GenNormals;  // | aiProcess_FlipUVs  // TODO assimp
+    unsigned int flags = aiProcess_Triangulate | aiProcess_GenNormals;
     const aiScene* scene_ai = importer.ReadFile(path, flags);
 
     if (!scene_ai) // handle error
         throw std::runtime_error("ERROR: Failed to load file: " + path + "!");
+
+    unsigned materialOffset = this->Materials.size();
 
     // load materials
     for (unsigned int i = 0; i < scene_ai->mNumMaterials; i++) {
@@ -54,7 +57,7 @@ void Scene::load(const std::string path) {
             material.albedo = colorDiffuse;
 		else
             material.albedo = colorSpecular;
-		
+
         material.albedo = glm_to_color(pow(color_to_glm(material.albedo), vec3(2.2f, 2.2f, 2.2f)));
 		material.emissive = colorEmissive;
 
@@ -74,12 +77,12 @@ void Scene::load(const std::string path) {
     // load mesh
     for (unsigned int i = 0; i < scene_ai->mNumMeshes; i++) {
         const aiMesh* mesh_ai = scene_ai->mMeshes[i];
-        uint32_t material_id = scene_ai->mMeshes[i]->mMaterialIndex;
+        uint32_t material_id = scene_ai->mMeshes[i]->mMaterialIndex + materialOffset;
         uint32_t index_offset = this->Vertices.size();
 
         // ToDo: check if material is emissive
         // load vetices
-        for (unsigned int i = 0; i < mesh_ai->mNumVertices; i++) {
+        for (unsigned int i = 0; i < mesh_ai->mNumVertices; ++i) {
             Vertex vertex;
             vertex.pos = to_glm(mesh_ai->mVertices[i]);
             vertex.norm = to_glm(mesh_ai->mNormals[i]);
@@ -93,7 +96,7 @@ void Scene::load(const std::string path) {
         }
 
         //load triangles
-        for (unsigned int i = 0; i < mesh_ai->mNumFaces; i++) {
+        for (unsigned int i = 0; i < mesh_ai->mNumFaces; ++i) {
             const aiFace &face = mesh_ai->mFaces[i];
             // check if face is a triangle
             if (face.mNumIndices == 3) {
@@ -106,7 +109,7 @@ void Scene::load(const std::string path) {
 
                 // std::cout << "Triangle: " << triangle.a << triangle.b << triangle.c << std::endl;
             } else {
-                std::cout << "WARN: Mesh: skipping non-triangle [" << face.mNumIndices << "] face (that the ass imp did not triangulate)!" << std::endl;
+                std::cout << "WARN: Mesh: skipping non-triangle [" << face.mNumIndices << "] face" << std::endl;
             }
         }
     }

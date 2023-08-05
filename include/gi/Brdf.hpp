@@ -18,6 +18,10 @@ class Brdf {
             float x = a.x*b.x + a.y*b.y + a.z*b.z;
             return x < 0.0f ? 0.0f : x;
         }
+        inline float absdot(const vec3 &a, const vec3 &b) {
+            float x = a.x*b.x + a.y*b.y + a.z*b.z;
+            return x < 0.0f ? -x : x;
+        }
         virtual vec3 f(HitPoint& hp, vec3 wi, vec3 wo) = 0;
         virtual ~Brdf() = default;
 };
@@ -29,7 +33,11 @@ class LambertianBrdf : public Brdf {
 
 
 class PhongBrdf : public Brdf {
+    private:
+        // is needed because albedo should not be added if it is layered. It is already added in Lambertian
+        bool _isCoat = false;
     public:
+        PhongBrdf(bool isCoat = false):_isCoat(isCoat){};
         vec3 f(HitPoint& hp, vec3 wi, vec3 wo) override;
 };
 
@@ -61,7 +69,7 @@ class BrdfFabric {
                 }
                 case BrdfType::Layered: {
                     Brdf* core = getBrdf(BrdfType::Lambertian);
-                    Brdf* coat = getBrdf(BrdfType::Phong);
+                    Brdf* coat = new PhongBrdf(true);
                     return new LayeredBrdf(core, coat);
                     break;
                 }

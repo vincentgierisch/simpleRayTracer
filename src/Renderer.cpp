@@ -21,7 +21,7 @@ Color Renderer::calculateAlbedo(HitPoint& hitpoint, Ray& r) {
         shadowRay.setMax(distance);
         if(!this->_rayTracer->any_hit(shadowRay)) {
             //std::cout << "albedo: " << hitpoint.albedo().red << std::endl;
-            vec3 c = pointlight.getPower() * hitpoint.material->brdf->f(hitpoint, wi, -r.direction) / (distance * distance);
+            vec3 c = pointlight.getPower() * hitpoint.material->brdf->f(hitpoint, -r.direction, wi) / (distance * distance);
             return glm_to_color(c);
         }
         colors.push_back(resultColor);

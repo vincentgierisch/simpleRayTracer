@@ -1,8 +1,13 @@
 #include "../../include/gi/Brdf.hpp"
 
-float Brdf::fresnel(float cosThetaI, float n1, float n2) {
+float Brdf::fresnel(float cosThetaI, float ior_medium, float ior_material) {
+    const float n1 = cosThetaI < 0.0f ? ior_material : ior_medium;
+    const float n2 = cosThetaI < 0.0f ? ior_medium : ior_material;
+    cosThetaI = glm::clamp(glm::abs(cosThetaI), 0.0f, 1.0f);
+
     float sinTheta = sqrtf(1.0f - powf(cosThetaI, 2));
-    float thetaT = asin((n1/n2)*sinTheta);
+    if ((n1/n2)*sinTheta >= 1.0f) return 1.0f;
+    float thetaT = asinf((n1/n2)*sinTheta);
 
     float cosThetaT = cosf(thetaT);
     float Rs = powf((n1*cosThetaI - n2*cosThetaT) / (n1*cosThetaI + n2*cosThetaT), 2);
@@ -27,11 +32,12 @@ vec3 PhongBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
 	vec3 wr = 2.0f*hp.norm*dot(wi,hp.norm)-wi;
 	// const float norm_f = (exponent + 2.0f) * (1.0f / (2.0f * M_PI));
 	// return color_to_glm(hp.albedo()) * powf(cos_theta, exponent) * norm_f * this->cdot(wi,hp.norm);
-    return (float)(powf(dot(wr, wo), exponent) / (2.0f * M_PIf32)) * color_to_glm(hp.albedo());
+    float norm = (exponent + 2.0f) / (2.0f * M_PIf32);
+    return (float)(powf(cdot(wr, wo), exponent) * norm * cdot(wi,hp.norm)) * (this->_isCoat ? vec3(1) : color_to_glm(hp.albedo()));
 }
 
 vec3 LayeredBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
-    float R = this->fresnel(this->cdot(hp.norm, wo), 1.0f, hp.material->ior);
-    return (R*this->Coat->f(hp, wi, wo) + (1 - R) * this->Core->f(hp, wi, wo)) * color_to_glm(hp.albedo());
-    return this->Core->f(hp, wi, wo) + this->Coat->f(hp, wi, wo);
+    float R = this->fresnel(this->absdot(hp.norm, wo), 1.0f, hp.material->ior);
+    return R*this->Coat->f(hp, wi, wo) + (1.0f - R) * this->Core->f(hp, wi, wo);
+    // return this->Core->f(hp, wi, wo) + this->Coat->f(hp, wi, wo);
 }
