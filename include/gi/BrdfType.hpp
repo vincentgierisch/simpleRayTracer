@@ -4,7 +4,9 @@
 typedef enum BrdfType {
     Lambertian = 0,
     Phong = 1,
-    Layered = 2
+    Layered = 2,
+    CookTorrance = 3
+
 } BrdfType;
 
 #endif

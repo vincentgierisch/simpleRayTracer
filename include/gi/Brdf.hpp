@@ -41,6 +41,14 @@ class PhongBrdf : public Brdf {
         vec3 f(HitPoint& hp, vec3 wi, vec3 wo) override;
 };
 
+class CookTorranceBrdf : public Brdf {
+    private:
+        bool _isCoat = false;
+    public:
+        CookTorranceBrdf(bool isCoat = false):_isCoat(isCoat){};
+        vec3 f(HitPoint& hp, vec3 wi, vec3 wo) override;
+};
+
 class LayeredBrdf : public Brdf {
     private:
         Brdf* Core;
@@ -64,13 +72,16 @@ class BrdfFabric {
                     break;
                 }
                 case BrdfType::Phong: {
-                    return new PhongBrdf;
                     break;
                 }
                 case BrdfType::Layered: {
                     Brdf* core = getBrdf(BrdfType::Lambertian);
                     Brdf* coat = new PhongBrdf(true);
                     return new LayeredBrdf(core, coat);
+                    break;
+                }
+                case BrdfType::CookTorrance: {
+                    return new CookTorranceBrdf(false);
                     break;
                 }
                 default: {

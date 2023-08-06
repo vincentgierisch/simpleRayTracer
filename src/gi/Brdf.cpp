@@ -41,3 +41,7 @@ vec3 LayeredBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
     return R*this->Coat->f(hp, wi, wo) + (1.0f - R) * this->Core->f(hp, wi, wo);
     // return this->Core->f(hp, wi, wo) + this->Coat->f(hp, wi, wo);
 }
+
+vec3 CookTorranceBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
+    return color_to_glm(hp.albedo());
+}
