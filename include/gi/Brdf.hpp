@@ -14,6 +14,8 @@ class Brdf {
     public:
         const float OneOverPi = (1.0f / M_PI);
         float fresnel (float cosThetaI, float n1, float n2);
+        float ggx(float cosSThetaH, float roughness);
+        float ggxG(float cosSThetaH, float roughness);
         inline float cdot(const vec3 &a, const vec3 &b) {
             float x = a.x*b.x + a.y*b.y + a.z*b.z;
             return x < 0.0f ? 0.0f : x;
@@ -82,6 +84,12 @@ class BrdfFabric {
                 }
                 case BrdfType::CookTorrance: {
                     return new CookTorranceBrdf(false);
+                    break;
+                }
+                case BrdfType::LayeredCT: {
+                    Brdf* core = getBrdf(BrdfType::Lambertian);
+                    Brdf* coat = new CookTorranceBrdf(true);
+                    return new LayeredBrdf(core, coat);
                     break;
                 }
                 default: {

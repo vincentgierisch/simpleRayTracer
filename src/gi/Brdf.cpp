@@ -16,6 +16,18 @@ float Brdf::fresnel(float cosThetaI, float ior_medium, float ior_material) {
     return 0.5f * (Rs + Rp);
 }
 
+float Brdf::ggx(float cosSThetaH, float roughness) {
+    float sRoughness = powf(roughness, 2.0f);
+
+    return (sRoughness/M_1_PIf32)*powf(1.0f + (sRoughness - 1.0f) * cosSThetaH, -2);
+}
+
+float Brdf::ggxG(float cosSThetaH, float roughness) {
+    float sRoughness = powf(roughness, 2.0f);
+    float lambda = 0.5f * (sqrtf(1.0f + (sRoughness/cosSThetaH)-sRoughness) - 1.0f);
+    return 1.0f / (1.0f + lambda);
+}
+
 vec3 LambertianBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
     return OneOverPi * color_to_glm(hp.albedo());
 }
@@ -43,5 +55,15 @@ vec3 LayeredBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
 }
 
 vec3 CookTorranceBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
-    return color_to_glm(hp.albedo());
+    if (dot(wi, hp.norm) <= 0) return vec3(0);
+    // https://boksajak.github.io/files/CrashCourseBRDF.pdf
+    vec3 H = normalize(wi+wo);
+    float cosThetaH = dot(hp.norm, H);
+
+    float F = this->fresnel(dot(H, wo), 1.0f, hp.material->ior);
+    float D = ggx((cosThetaH * cosThetaH), hp.material->roughness);
+    float G = ggxG(dot(wi, hp.norm), hp.material->roughness) * ggxG(dot(wo, hp.norm), hp.material->roughness);
+    float f = (F*D*G) / (4.0f * this->absdot(wi, hp.norm) * this->absdot(wo, hp.norm));
+    
+    return this->_isCoat ? vec3(f) : f * color_to_glm(hp.albedo());
 }
