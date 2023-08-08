@@ -74,7 +74,7 @@ void Renderer::run() {
 std::vector<Color> Renderer::sample_pixel(unsigned int x, unsigned int y) {
     std::vector<Color> result;
 
-    for (unsigned int sample = 0; sample < this->_sspx; sample++){
+    for (unsigned int sample = 0; sample < this->_sspx; ++sample){
         Color sampleColor(0, 0, 0);
         Ray ray = Scene::getInstance().camera.spawnRay(x, y, vec2(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX)));
         TriangleIntersection intersection = this->_rayTracer->closest_hit(ray);

@@ -19,8 +19,8 @@ class Texture {
             int x = (int)(u*width+0.5f);
             int y = (int)(v*height+0.5f);
 
-            if (x == width) x = 0;
-            if (y == height) y = 0;
+            if (abs(x) == width) x = 0;
+            if (abs(y) == height) y = 0;
 
             return Texel[y*width+x];
         }

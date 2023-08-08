@@ -6,7 +6,7 @@ void Scene::getPixelsFromPng(png::image<png::rgb_pixel> image, Color* storage){
     unsigned int width = image.get_width();
     unsigned int height = image.get_height();
     #pragma omp parallel for
-    for (int i = 0; i < (width * height); i++) {
+    for (unsigned int i = 0; i < (width * height); ++i) {
         png::rgb_pixel& pixel = image[i / width][i % width];
         storage[i] = Color(pixel.red, pixel.green, pixel.blue) / 255.0f;
     }
@@ -37,7 +37,7 @@ void Scene::load(const std::string path) {
     unsigned materialOffset = this->Materials.size();
 
     // load materials
-    for (unsigned int i = 0; i < scene_ai->mNumMaterials; i++) {
+    for (unsigned int i = 0; i < scene_ai->mNumMaterials; ++i) {
         Material material;
         aiColor3D col;
         auto mat_ai = scene_ai->mMaterials[i];
@@ -75,7 +75,7 @@ void Scene::load(const std::string path) {
     }
 
     // load mesh
-    for (unsigned int i = 0; i < scene_ai->mNumMeshes; i++) {
+    for (unsigned int i = 0; i < scene_ai->mNumMeshes; ++i) {
         const aiMesh* mesh_ai = scene_ai->mMeshes[i];
         uint32_t material_id = scene_ai->mMeshes[i]->mMaterialIndex + materialOffset;
         uint32_t index_offset = this->Vertices.size();
