@@ -27,6 +27,11 @@ clean:
 	@echo " Cleaning..."; 
 	@echo " $(RM) -r $(BUILDDIR) $(BINDIR)"; $(RM) -r $(BUILDDIR) $(BINDIR)
 
-.PHONY: clean
+.PHONY: clean ocl
+
+ocl:
+	@echo " Compiling OCL files..."
+	@$(CC) src/oclTest.cpp -o bin/srtRendererOCL -l OpenCL
+
 
 all: $(TARGET)
