@@ -14,7 +14,7 @@ class Brdf {
     public:
         const float OneOverPi = (1.0f / M_PI);
         float fresnel (float cosThetaI, float n1, float n2);
-        float ggx(float cosSThetaH, float roughness);
+        float ggx(float cosThetaH, float roughness);
         float ggxG(float cosThetaH, float roughness);
         inline float cdot(const vec3 &a, const vec3 &b) {
             float x = a.x*b.x + a.y*b.y + a.z*b.z;
