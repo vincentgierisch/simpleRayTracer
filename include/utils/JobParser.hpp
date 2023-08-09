@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <map>
 
 using namespace glm;
 
@@ -15,6 +16,28 @@ struct JobData {
     {
         vec3 Position;
         vec3 Color;
+    };
+
+    class MaterialData
+    {
+        private: 
+            vec3 _albedo;
+            float _ior, _roughness;
+            bool _albedoSet, _iorSet, _roughnessSet;
+        public:
+            MaterialData() : _albedoSet(false), _iorSet(false), _roughnessSet(false) {};
+
+            inline void setAlbedo(vec3 albedo) {this->_albedo = albedo; this->_albedoSet = true;};
+            inline void setIor(float ior) {this->_ior = ior; this->_iorSet = true;};
+            inline void setRoughness(float roughness) {this->_roughness = roughness; this->_roughnessSet = true;};
+
+            inline vec3 getAlbedo() {return this->_albedo;};
+            inline float getIor() {return this->_ior;};
+            inline float getRoughness() {return this->_roughness;};
+
+            inline bool isAlbedoSet() {return this->_albedoSet;};
+            inline bool isIorSet() {return this->_iorSet;};
+            inline bool isRoughnessSet() {return this->_roughnessSet;};
     };
     
     short DefaultBrdf;
@@ -26,6 +49,7 @@ struct JobData {
     vec2 Resolution;
     unsigned int SamplesPerPixel;
     std::vector<PointLightData> PointLights;
+    std::map<std::string, MaterialData> Materials;
     std::string OutPath;
 };
 

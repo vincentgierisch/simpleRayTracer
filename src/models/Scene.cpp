@@ -40,7 +40,11 @@ void Scene::load(const std::string path) {
     for (unsigned int i = 0; i < scene_ai->mNumMaterials; ++i) {
         Material material;
         aiColor3D col;
-        auto mat_ai = scene_ai->mMaterials[i];
+        aiString nameAi;
+        aiMaterial* mat_ai = scene_ai->mMaterials[i];
+
+        mat_ai->Get(AI_MATKEY_NAME, nameAi);
+        material.name = nameAi.C_Str();
 
         Color colorDiffuse, colorSpecular, colorEmissive;
 

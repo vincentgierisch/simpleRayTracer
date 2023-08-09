@@ -54,6 +54,19 @@ void Renderer::init(std::string jobPath) {
 
     scene.load(jd.ObjFilePath);
 
+    // check if job has overwritten materials
+    for (Material& material : scene.Materials) {
+        if (jd.Materials.count(material.name)) {
+            JobData::MaterialData& md = jd.Materials[material.name];
+            if (md.isAlbedoSet())
+                material.albedo = glm_to_color(md.getAlbedo());
+            if (md.isIorSet())
+                material.ior = md.getIor();
+            if (md.isRoughnessSet())
+                material.roughness = md.getRoughness();
+        }
+    }
+
     if (jd.RayTracer == "bvh") {
         this->_rayTracer = new BinaryBvhRayTracer();
     } else {

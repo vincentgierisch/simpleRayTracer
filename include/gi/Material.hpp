@@ -9,6 +9,7 @@ class Brdf;
 
 class Material {
     public:
+        std::string name;
         Color albedo;
         Color emissive;
         Texture* albedo_tex = nullptr;

@@ -3,6 +3,10 @@
 JobData JobParser::parse(std::string path) {
     JobData jd;
 
+    // bit hacky
+    std::string materialName = "";
+    JobData::MaterialData md = JobData::MaterialData();
+
     std::ifstream infile(path);
     while (!infile.eof()) {
         std::string line, command;
@@ -11,7 +15,6 @@ JobData JobParser::parse(std::string path) {
         std::istringstream in(line);
 
         in >> command;
-
         if (command == "at") {
             in >> jd.CameraPosition;
         } else if (command == "look"){
@@ -45,6 +48,35 @@ JobData JobParser::parse(std::string path) {
             pld.Position = position;
             pld.Color = color;
             jd.PointLights.push_back(pld);
+        } else if (command == "material") {
+            std::string cmd;
+            in >> cmd;
+            if (cmd == "end") {
+                if (materialName == "") {
+                    throw std::runtime_error("ERROR: no material set: " + cmd);
+                }
+                jd.Materials[materialName] = md;
+                materialName = "";
+            } else if (cmd == "select") {
+                md = JobData::MaterialData();
+                std::string name;
+                in >> name;
+                materialName = name;
+            } else if (cmd == "albedo") {
+                vec3 albedo;
+                in >> albedo;
+                md.setAlbedo(albedo);
+            } else if (cmd == "ior") {
+                float ior;
+                in >> ior;
+                md.setIor(ior);
+            } else if (cmd == "roughness") {
+                float roughness;
+                in >> roughness;
+                md.setRoughness(roughness);
+            } else {
+                throw std::runtime_error("ERROR: unknown material command: " + cmd);
+            }
         } else if (command == "raytracer") {
             in >> jd.RayTracer;
         } else if (command == "default-brdf") {
