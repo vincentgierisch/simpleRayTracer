@@ -29,11 +29,16 @@ Color Renderer::calculateAlbedo(HitPoint& hitpoint, Ray& r) {
     return this->getAverageColor(colors);
 }
 
-void Renderer::init(std::string jobPath) {
+void Renderer::init(std::string jobPath, DisplayType displayType) {
+    this->_displayType = displayType;
     JobData jd = JobParser::parse(jobPath);
     
     this->_sspx = jd.SamplesPerPixel;
     this->_outPath = jd.OutPath;
+
+    if (this->_displayType == DisplayType::Live) {
+        this->_window = new Window(unsigned(jd.Resolution.x), unsigned(jd.Resolution.y));
+    }
 
     // init framebuffer
     this->_framebuffer = Framebuffer(int(jd.Resolution.x), int(jd.Resolution.y));
@@ -78,9 +83,12 @@ void Renderer::init(std::string jobPath) {
 
 void Renderer::run() {
     this->_framebuffer.buffer.for_each([&](unsigned x, unsigned y) {
-										this->_framebuffer.add(x, y, this->getAverageColor(this->sample_pixel(x, y)));
+                                        Color col = this->getAverageColor(this->sample_pixel(x, y));
+										this->_framebuffer.add(x, y, col);
+                                        if (this->_displayType == DisplayType::Live) {
+                                            this->_window->drawPixel(x, y, col);
+                                        }
     								});
-
     this->_framebuffer.png().write(this->_outPath);
 }
 

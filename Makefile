@@ -9,15 +9,15 @@ SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 CFLAGS := -g -std=c++17 -O3 -Wall -fopenmp `libpng-config --cflags`
-LIB := -L lib -fopenmp `libpng-config --ldflags` -lassimp
+LIB := -L lib -fopenmp `libpng-config --ldflags` -lassimp -lglfw -lrt -lm -ldl -lm -pthread -lrt -lffi -lGL -lGLEW -Llib
 INC := -I include  
 
 
 
 $(TARGET): $(OBJECTS)
-	@echo " Linking..."
+	@echo "Linking $(OBJECTS)"
 	@mkdir -p $(BINDIR)
-	@echo " $(CC) $^ -o $(TARGET) $(LIB)"; $(CC) $^ -o $(TARGET) $(LIB)
+	@$(CC) $^ -o $(TARGET) $(LIB)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@mkdir -p $(BUILDDIR) $(BUILDDIR)/models $(BUILDDIR) $(BUILDDIR)/gi $(BUILDDIR)/utils $(BUILDDIR)/raytracer
