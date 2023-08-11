@@ -1,23 +1,29 @@
 #ifndef WINDOW_HPP
 #define WINDOW_HPP
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
 #include <stdexcept>
 #include <string>
 #include <iostream>
+
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_timer.h>
 
 #include "Color.hpp"
 
 class Window {
     private:
         unsigned int _width, _height;
-        GLubyte* _pixelBuffer;
-        GLFWwindow* _window;
+        unsigned int* _pixelBuffer;
+
+        SDL_Window* _window;
+        SDL_Renderer* _renderer;
+        SDL_Texture* _texture;
     public:
         Window(unsigned int width, unsigned int height);
         Window(){};
         void drawPixel(unsigned x, unsigned y, Color color);
+        ~Window() {
+            delete[] this->_pixelBuffer;
+        };
 };
 #endif

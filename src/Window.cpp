@@ -2,49 +2,45 @@
 
 Window::Window(unsigned int width, unsigned int height): _width(width), _height(height){
     // init pixel buffer
-    this->_pixelBuffer = new GLubyte[width * height * 3];
+    // this->_pixelBuffer = new GLubyte[width * height * 3];
 
-    // init window
-    if(!glfwInit()) {
-		std::string description;
-        const char* pDescription = description.c_str();
-		int code = glfwGetError(&pDescription);
-        throw std::runtime_error("Failed to initializeGLFW: " + code);
+	// init sdl
+	if (SDL_Init(SDL_INIT_EVERYTHING) !=0) {
+		std::string errMsg(SDL_GetError());
+		throw std::runtime_error("ERROR: initializing sdl: " + errMsg); 
 	}
-	glfwWindowHint(GLFW_SAMPLES, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); 
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);	
 
 	// Create Window
-	this->_window = glfwCreateWindow(width, height, "SimpleRayTracer", NULL, NULL);
-	if(this->_window == NULL) {
-        glfwTerminate();
-        throw std::runtime_error("Failed to open GLFW window");
-	}
-	glfwMakeContextCurrent(this->_window);
+	this->_window = SDL_CreateWindow("SimpleRayTracer",
+                                       SDL_WINDOWPOS_CENTERED,
+                                       SDL_WINDOWPOS_CENTERED,
+                                       width, height, 0);
 
-	glewExperimental = GL_TRUE;
-	GLenum err = glewInit();
-	if (GLEW_OK != err) {
-	  /* Problem: glewInit failed, something is seriously wrong. */
-        glfwTerminate();
-        throw std::runtime_error("Error while init glew");
-		
+
+	this->_renderer = SDL_CreateRenderer(this->_window, -1, SDL_RENDERER_PRESENTVSYNC);
+
+	this->_texture = SDL_CreateTexture(this->_renderer,
+		SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, width, height);
+
+	// init pixelbuffer
+	this->_pixelBuffer = new unsigned int[width*height];
+
+	// set buffer to black
+	for (unsigned int i = 0; i < height*width; ++i) {
+		this->_pixelBuffer[i] = 0xFFFFFFFF;
 	}
-	glfwSetInputMode(this->_window, GLFW_STICKY_KEYS, GL_TRUE);
-	glViewport(0, 0, width, height);
 };
 
 void Window::drawPixel(unsigned x, unsigned y, Color color) {
-    int position = (x + y * this->_width) * 3;
-    this->_pixelBuffer[position] = 1;
-    this->_pixelBuffer[position + 1] = color.green / 255.0f;
-    this->_pixelBuffer[position + 2] = color.blue / 255.0f;
+	// color to int
 
-    glClear(GL_COLOR_BUFFER_BIT);
-    glDrawPixels(this->_width, this->_height, GL_RGB, GL_UNSIGNED_BYTE, this->_pixelBuffer);
-    glfwSwapBuffers(this->_window); 
-    glfwPollEvents();
+	std::cout << color.red << " | " << color.blue << " | " << color.green << std::endl;
+
+	unsigned int hexColor = (((unsigned int)color.red & 0xff) << 24) + (((unsigned int)color.green & 0xff) << 16) + (((unsigned int)color.blue & 0xff) << 8) + (0x00 & 0xff);
+	std::cout <<"0x"<< std::hex << hexColor << std::endl;
+	this->_pixelBuffer[x+y*this->_width] = hexColor;
+	SDL_RenderClear(this->_renderer);
+	SDL_UpdateTexture(this->_texture, NULL, this->_pixelBuffer, this->_width*4);
+	SDL_RenderCopy(this->_renderer, this->_texture, NULL, NULL);
+	SDL_RenderPresent(this->_renderer);
 };

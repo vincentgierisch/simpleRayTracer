@@ -8,8 +8,8 @@ TARGET := bin/srtRenderer
 SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
-CFLAGS := -g -std=c++17 -O3 -Wall -fopenmp `libpng-config --cflags`
-LIB := -L lib -fopenmp `libpng-config --ldflags` -lassimp -lglfw -lrt -lm -ldl -lm -pthread -lrt -lffi -lGL -lGLEW -Llib
+CFLAGS := -g -std=c++17 -O3 -Wall -fopenmp `libpng-config --cflags` `sdl2-config --libs --cflags` -lm
+LIB := -L lib -fopenmp `libpng-config --ldflags` -lassimp -lSDL2
 INC := -I include  
 
 

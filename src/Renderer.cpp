@@ -86,7 +86,7 @@ void Renderer::run() {
                                         Color col = this->getAverageColor(this->sample_pixel(x, y));
 										this->_framebuffer.add(x, y, col);
                                         if (this->_displayType == DisplayType::Live) {
-                                            this->_window->drawPixel(x, y, col);
+                                            this->_window->drawPixel(x, y, col*255.f);
                                         }
     								});
     this->_framebuffer.png().write(this->_outPath);
