@@ -9,6 +9,7 @@
 #include <SDL2/SDL_timer.h>
 
 #include "Color.hpp"
+#include "FrameBuffer.hpp"
 
 class Window {
     private:
@@ -21,7 +22,7 @@ class Window {
     public:
         Window(unsigned int width, unsigned int height);
         Window(){};
-        void drawPixel(unsigned x, unsigned y, Color color);
+        void drawPixel(Buffer<Color>& buffer);
         ~Window() {
             delete[] this->_pixelBuffer;
         };

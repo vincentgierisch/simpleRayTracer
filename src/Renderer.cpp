@@ -85,8 +85,8 @@ void Renderer::run() {
     this->_framebuffer.buffer.for_each([&](unsigned x, unsigned y) {
                                         Color col = this->getAverageColor(this->sample_pixel(x, y));
 										this->_framebuffer.add(x, y, col);
-                                        if (this->_displayType == DisplayType::Live) {
-                                            this->_window->drawPixel(x, y, col*255.f);
+                                        if (this->_displayType == DisplayType::Live && x == 0) {
+                                            this->_window->drawPixel(this->_framebuffer.buffer);
                                         }
     								});
     this->_framebuffer.png().write(this->_outPath);

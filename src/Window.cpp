@@ -31,14 +31,16 @@ Window::Window(unsigned int width, unsigned int height): _width(width), _height(
 	}
 };
 
-void Window::drawPixel(unsigned x, unsigned y, Color color) {
+void Window::drawPixel(Buffer<Color>& buffer) {
 	// color to int
-
-	std::cout << color.red << " | " << color.blue << " | " << color.green << std::endl;
-
-	unsigned int hexColor = (((unsigned int)color.red & 0xff) << 24) + (((unsigned int)color.green & 0xff) << 16) + (((unsigned int)color.blue & 0xff) << 8) + (0x00 & 0xff);
-	std::cout <<"0x"<< std::hex << hexColor << std::endl;
-	this->_pixelBuffer[x+y*this->_width] = hexColor;
+	buffer.for_each([&](unsigned x, unsigned y) {
+        Color color(buffer(x,y));
+		color = glm_to_color(pow(clamp(color_to_glm(color), vec3(0), vec3(1)), vec3(1.0f/2.2f)) * 255.0f);
+		unsigned int hexColor = (((unsigned int)color.red & 0xff) << 24) + (((unsigned int)color.green & 0xff) << 16) + (((unsigned int)color.blue & 0xff) << 8) + (0xff & 0xff);
+        this->_pixelBuffer[x+y*this->_width] = hexColor;
+		// out[buffer.h - y - 1][x] = png::rgb_pixel(c.red, c.green, c.blue);
+	});
+	
 	SDL_RenderClear(this->_renderer);
 	SDL_UpdateTexture(this->_texture, NULL, this->_pixelBuffer, this->_width*4);
 	SDL_RenderCopy(this->_renderer, this->_texture, NULL, NULL);
