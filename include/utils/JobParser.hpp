@@ -7,6 +7,7 @@
 #include <iostream>
 #include <sstream>
 #include <map>
+#include "../Renderer.hpp"
 
 using namespace glm;
 
@@ -40,7 +41,7 @@ struct JobData {
             inline bool isRoughnessSet() {return this->_roughnessSet;};
     };
     
-    short DefaultBrdf;
+    short DefaultBrdf = 0;
     vec3 CameraPosition;
     vec3 CameraDirection;
     vec3 CameraUp;
@@ -51,6 +52,7 @@ struct JobData {
     std::vector<PointLightData> PointLights;
     std::map<std::string, MaterialData> Materials;
     std::string OutPath;
+    short RendererType;
 };
 
 class JobParser

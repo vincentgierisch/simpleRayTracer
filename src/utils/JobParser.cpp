@@ -81,6 +81,8 @@ JobData JobParser::parse(std::string path) {
             in >> jd.RayTracer;
         } else if (command == "default-brdf") {
             in >> jd.DefaultBrdf;
+        } else if (command == "rendererType") {
+            in >> jd.RendererType;
         } else if (command == "") {
         } else if (command[0] == '#') {
         } else {

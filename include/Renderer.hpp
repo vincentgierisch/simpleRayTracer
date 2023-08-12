@@ -18,6 +18,13 @@
 
 using namespace glm;
 
+typedef enum RendererType {
+    LocalIllumination = 0,
+    DirectIllumination = 1,
+    GlobalIllumination = 2
+
+} RendererType;
+
 class Renderer {
     private:
         Framebuffer _framebuffer;
@@ -29,8 +36,9 @@ class Renderer {
 
         DisplayType _displayType;
         Window* _window = nullptr;
+        RendererType _type;
     public:
-        Renderer(): _framebuffer(0, 0) {};
+        Renderer(): _framebuffer(0, 0), _type(RendererType::LocalIllumination) {};
         void init(std::string jobPath, DisplayType displayType);
         void run();
         std::vector<Color> sample_pixel(unsigned int x, unsigned int y);

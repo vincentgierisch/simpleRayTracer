@@ -35,6 +35,9 @@ void Renderer::init(std::string jobPath, DisplayType displayType) {
     
     this->_sspx = jd.SamplesPerPixel;
     this->_outPath = jd.OutPath;
+    this->_type = (RendererType)jd.RendererType;
+
+    std::cout << "RendererType: " << this->_type << std::endl;
 
     if (this->_displayType == DisplayType::Live) {
         this->_window = new Window(unsigned(jd.Resolution.x), unsigned(jd.Resolution.y));
