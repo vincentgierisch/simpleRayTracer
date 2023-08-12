@@ -23,6 +23,7 @@ class Window {
         Window(unsigned int width, unsigned int height);
         Window(){};
         void drawPixel(Buffer<Color>& buffer);
+        void waitTillClose();
         ~Window() {
             delete[] this->_pixelBuffer;
         };

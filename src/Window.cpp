@@ -37,7 +37,7 @@ void Window::drawPixel(Buffer<Color>& buffer) {
         Color color(buffer(x,y));
 		color = glm_to_color(pow(clamp(color_to_glm(color), vec3(0), vec3(1)), vec3(1.0f/2.2f)) * 255.0f);
 		unsigned int hexColor = (((unsigned int)color.red & 0xff) << 24) + (((unsigned int)color.green & 0xff) << 16) + (((unsigned int)color.blue & 0xff) << 8) + (0xff & 0xff);
-        this->_pixelBuffer[x+y*this->_width] = hexColor;
+        this->_pixelBuffer[x+((this->_height - y)*this->_width)] = hexColor;
 		// out[buffer.h - y - 1][x] = png::rgb_pixel(c.red, c.green, c.blue);
 	});
 	
@@ -46,3 +46,19 @@ void Window::drawPixel(Buffer<Color>& buffer) {
 	SDL_RenderCopy(this->_renderer, this->_texture, NULL, NULL);
 	SDL_RenderPresent(this->_renderer);
 };
+
+void Window::waitTillClose() {
+  SDL_Event event;
+  SDL_PollEvent(&event);
+  while(event.type != SDL_QUIT){
+    while(SDL_PollEvent(&event)){
+       if (event.type == SDL_QUIT){
+          SDL_Quit();
+          return;
+       }
+          SDL_RenderPresent(this->_renderer);
+          SDL_Delay(50);            
+    }
+    SDL_Delay(100);
+  }
+}
