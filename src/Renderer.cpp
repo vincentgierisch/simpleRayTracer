@@ -1,34 +1,5 @@
 #include "../include/Renderer.hpp"
 
-Color Renderer::getAverageColor(std::vector<Color> colors){
-    Color averageColor(0, 0, 0);
-    for (Color& color : colors) {
-        averageColor.red += color.red;
-        averageColor.green += color.green;
-        averageColor.blue += color.blue;
-    }
-    return averageColor / colors.size();
-}
-
-Color Renderer::calculateAlbedo(HitPoint& hitpoint, Ray& r) {
-    std::vector<Color> colors;
-    for (Pointlight& pointlight : Scene::getInstance().Pointlights) {
-        Color resultColor(0, 0, 0);
-        vec3 toPoint = pointlight.Position - hitpoint.x;
-        vec3 wi = normalize(toPoint);
-        Ray shadowRay(hitpoint.x, wi);
-        float distance = sqrtf(dot(toPoint, toPoint));
-        shadowRay.setMax(distance);
-        if(!this->_rayTracer->any_hit(shadowRay)) {
-            //std::cout << "albedo: " << hitpoint.albedo().red << std::endl;
-            vec3 c = pointlight.getPower() * hitpoint.material->brdf->f(hitpoint, -r.direction, wi) / (distance * distance);
-            return glm_to_color(c);
-        }
-        colors.push_back(resultColor);
-    }
-    return this->getAverageColor(colors);
-}
-
 void Renderer::init(std::string jobPath, DisplayType displayType) {
     this->_displayType = displayType;
     JobData jd = JobParser::parse(jobPath);
@@ -36,8 +7,6 @@ void Renderer::init(std::string jobPath, DisplayType displayType) {
     this->_sspx = jd.SamplesPerPixel;
     this->_outPath = jd.OutPath;
     this->_type = (RendererType)jd.RendererType;
-
-    std::cout << "RendererType: " << this->_type << std::endl;
 
     if (this->_displayType == DisplayType::Live) {
         this->_window = new Window(unsigned(jd.Resolution.x), unsigned(jd.Resolution.y));
@@ -81,12 +50,20 @@ void Renderer::init(std::string jobPath, DisplayType displayType) {
         this->_rayTracer = new SeqRayTracer();
     }
 
+    
+    if (this->_type == RendererType::LocalIllumination) {
+        this->_albedoCalculator = new LocalAlbedoCalculator();
+    } else {
+        // fallback
+        this->_albedoCalculator = new LocalAlbedoCalculator();
+    }
+
     this->_rayTracer->init();
 }
 
 void Renderer::run() {
     this->_framebuffer.buffer.for_each([&](unsigned x, unsigned y) {
-                                        Color col = this->getAverageColor(this->sample_pixel(x, y));
+                                        Color col = this->sample_pixel(x, y);
 										this->_framebuffer.add(x, y, col);
                                         if (this->_displayType == DisplayType::Live && x == 0 && y%4 == 0) {
                                             this->_window->drawPixel(this->_framebuffer.buffer);
@@ -98,7 +75,7 @@ void Renderer::run() {
     }
 }
 
-std::vector<Color> Renderer::sample_pixel(unsigned int x, unsigned int y) {
+Color Renderer::sample_pixel(unsigned int x, unsigned int y) {
     std::vector<Color> result;
 
     for (unsigned int sample = 0; sample < this->_sspx; ++sample){
@@ -107,10 +84,10 @@ std::vector<Color> Renderer::sample_pixel(unsigned int x, unsigned int y) {
         TriangleIntersection intersection = this->_rayTracer->closest_hit(ray);
         if (intersection.isValid()) {
             HitPoint hitPoint(intersection);
-            sampleColor = this->calculateAlbedo(hitPoint, ray);
+            sampleColor = this->_albedoCalculator->calculateAlbedo(hitPoint, ray, this->_rayTracer);
         }
         result.push_back(sampleColor);
     }
 
-    return result;
+    return getAverageColor(result);
 }

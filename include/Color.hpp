@@ -2,6 +2,7 @@
 #define COLOR_HPP
 
 #include <glm/glm.hpp>
+#include <vector>
 
 using namespace glm;
 
@@ -35,4 +36,15 @@ inline Color glm_to_color(const vec3& v) {
 inline vec3 color_to_glm(const Color& c) {
     return vec3(c.red, c.green, c.blue);
 }
+
+inline Color getAverageColor(std::vector<Color>& colors){
+    Color averageColor(0, 0, 0);
+    for (Color& color : colors) {
+        averageColor.red += color.red;
+        averageColor.green += color.green;
+        averageColor.blue += color.blue;
+    }
+    return averageColor / colors.size();
+}
+
 #endif

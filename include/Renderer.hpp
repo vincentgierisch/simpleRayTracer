@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RENDERER_HPP
+#define RENDERER_HPP
 
 #include <string>
 #include <glm/glm.hpp>
@@ -15,6 +16,8 @@
 #include "utils/DisplayType.hpp"
 #include <vector>
 #include "Window.hpp"
+#include "gi/albedoCalculator.h"
+#include "gi/localAC.h"
 
 using namespace glm;
 
@@ -29,10 +32,9 @@ class Renderer {
     private:
         Framebuffer _framebuffer;
         RayTracer* _rayTracer;
+        AlbedoCalculator* _albedoCalculator;
         unsigned int _width, _height, _sspx;
         std::string _outPath;
-        Color getAverageColor(std::vector<Color> colors);
-        Color calculateAlbedo(HitPoint& hitpoint, Ray& wo);
 
         DisplayType _displayType;
         Window* _window = nullptr;
@@ -41,7 +43,7 @@ class Renderer {
         Renderer(): _framebuffer(0, 0), _type(RendererType::LocalIllumination) {};
         void init(std::string jobPath, DisplayType displayType);
         void run();
-        std::vector<Color> sample_pixel(unsigned int x, unsigned int y);
+        Color sample_pixel(unsigned int x, unsigned int y);
         ~Renderer() {
             if (this->_rayTracer != nullptr) {
                 delete this->_rayTracer;
@@ -49,5 +51,10 @@ class Renderer {
             if (this->_window != nullptr) {
                 delete this->_window;
             }
+            if (this->_albedoCalculator != nullptr) {
+                delete this->_albedoCalculator;
+            }
         };
 };
+
+#endif
