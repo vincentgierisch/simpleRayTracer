@@ -54,7 +54,7 @@ void Scene::load(const std::string path) {
         if (mat_ai->Get(AI_MATKEY_COLOR_DIFFUSE,  col) == AI_SUCCESS) colorDiffuse = Color(col.r, col.g, col.b);
 		if (mat_ai->Get(AI_MATKEY_COLOR_SPECULAR, col) == AI_SUCCESS) colorSpecular = Color(col.r, col.g, col.b);
 		if (mat_ai->Get(AI_MATKEY_COLOR_EMISSIVE, col) == AI_SUCCESS) colorEmissive = Color(col.r, col.g, col.b);
-		if (mat_ai->Get(AI_MATKEY_SHININESS,      tmp) == AI_SUCCESS) material.roughness = Helper::roughness_from_exponent(tmp);
+		if (mat_ai->Get(AI_MATKEY_SHININESS,      tmp) == AI_SUCCESS) material.roughness = roughness_from_exponent(tmp);
 		if (mat_ai->Get(AI_MATKEY_REFRACTI,       tmp) == AI_SUCCESS) material.ior = tmp;
 		
         if (luma(colorDiffuse) > 1e-4)
@@ -84,7 +84,6 @@ void Scene::load(const std::string path) {
         uint32_t material_id = scene_ai->mMeshes[i]->mMaterialIndex + materialOffset;
         uint32_t index_offset = this->Vertices.size();
 
-        // ToDo: check if material is emissive
         // load vetices
         for (unsigned int i = 0; i < mesh_ai->mNumVertices; ++i) {
             Vertex vertex;

@@ -20,7 +20,7 @@ class Camera{
                     this->_u = cross(direction, up);
                     this->_v = cross(_u, direction);
                     this->_aspect = float(width) / height;
-                    //this->_ph = 2.0f * tanf((phi * 180.0f) / (2.0f * M_PI));
+                    this->_ph = 2.0f * tanf((phi * 180.0f) / (2.0f * M_PI));
                     this->_ph = tanf(float(M_PI) * phi * 0.5f / 180.0f);
                     this->_pw = this->_aspect * this->_ph;
         }

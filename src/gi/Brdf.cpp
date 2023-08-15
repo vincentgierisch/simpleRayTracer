@@ -42,7 +42,7 @@ vec3 LambertianBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
 vec3 PhongBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
     if (dot(wi, hp.norm) <= 0) return vec3(0);
 
-	float exponent = Helper::exponent_from_roughness(hp.material->roughness);
+	float exponent = exponent_from_roughness(hp.material->roughness);
 	vec3 wr = 2.0f*hp.norm*dot(wi,hp.norm)-wi;
     float norm = (exponent + 2.0f) / (2.0f * M_PIf32);
     return (float)(powf(cdot(wr, wo), exponent) * norm * cdot(wi,hp.norm)) * (this->_isCoat ? vec3(1) : color_to_glm(hp.albedo()));

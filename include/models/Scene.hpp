@@ -14,7 +14,7 @@
 #include "gi/Brdf.hpp"
 #include "gi/Material.hpp"
 #include "gi/Texture.hpp"
-#include "../utils/Helper.hpp"
+#include "../utils/utils.hpp"
 #include "Color.hpp"
 #include "../gi/Camera.hpp"
 #include "Pointlight.hpp"

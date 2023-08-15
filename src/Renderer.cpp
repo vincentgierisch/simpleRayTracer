@@ -44,21 +44,33 @@ void Renderer::init(std::string jobPath, DisplayType displayType) {
         }
     }
 
-    if (jd.RayTracer == "bvh") {
+    this->_initAlbedoCalculator();
+    this->_initRayTracer(jd.RayTracer);
+}
+
+void Renderer::_initRayTracer(std::string& rtype) {
+    if (rtype == "bvh") {
         this->_rayTracer = new BinaryBvhRayTracer();
     } else {
         this->_rayTracer = new SeqRayTracer();
     }
 
-    
-    if (this->_type == RendererType::LocalIllumination) {
-        this->_albedoCalculator = new LocalAlbedoCalculator();
-    } else {
-        // fallback
-        this->_albedoCalculator = new LocalAlbedoCalculator();
-    }
-
     this->_rayTracer->init();
+}
+
+void Renderer::_initAlbedoCalculator() {
+    switch (this->_type)
+    {
+        case RendererType::LocalIllumination:
+            this->_albedoCalculator = new LocalAlbedoCalculator();
+            break;
+        case RendererType::DirectIllumination:
+            this->_albedoCalculator = new DirectAlbedoCalculator();
+            break;
+        default:
+            this->_albedoCalculator = new LocalAlbedoCalculator();
+            break;
+    }
 }
 
 void Renderer::run() {
@@ -71,6 +83,7 @@ void Renderer::run() {
     								});
     this->_framebuffer.png().write(this->_outPath);
     if (this->_displayType == DisplayType::Live) {
+        std::cout << "Finished rendering" << std::endl;
         this->_window->waitTillClose();
     }
 }

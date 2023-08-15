@@ -10,8 +10,8 @@ Color LocalAlbedoCalculator::calculateAlbedo(HitPoint& hitpoint, Ray& ray, RayTr
         float distance = sqrtf(dot(toPoint, toPoint));
         shadowRay.setMax(distance);
         if(!rt->any_hit(shadowRay)) {
-            vec3 c = pointlight.getPower() * hitpoint.material->brdf->f(hitpoint, -ray.direction, wi) / (distance * distance);
-            return glm_to_color(c);
+            vec3 c = pointlight.getPower() * hitpoint.material->brdf->f(hitpoint, -ray.direction, wi) * dot(hitpoint.norm, wi) / (distance * distance);
+            resultColor = glm_to_color(c);
         }
         colors.push_back(resultColor);
     }

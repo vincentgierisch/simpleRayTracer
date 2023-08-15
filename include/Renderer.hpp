@@ -18,6 +18,7 @@
 #include "Window.hpp"
 #include "gi/albedoCalculator.h"
 #include "gi/localAC.h"
+#include "gi/directAC.h"
 
 using namespace glm;
 
@@ -39,6 +40,9 @@ class Renderer {
         DisplayType _displayType;
         Window* _window = nullptr;
         RendererType _type;
+
+        void _initAlbedoCalculator();
+        void _initRayTracer(std::string& rtype);
     public:
         Renderer(): _framebuffer(0, 0), _type(RendererType::LocalIllumination) {};
         void init(std::string jobPath, DisplayType displayType);
