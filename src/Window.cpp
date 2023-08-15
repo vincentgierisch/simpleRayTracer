@@ -48,7 +48,10 @@ void Window::mainLoop() {
   SDL_Event event;
   while(event.type != SDL_QUIT){
     while(SDL_PollEvent(&event)){
-		
+		if (event.type == SDL_QUIT){
+			SDL_Quit();
+			return;
+       	}
 		SDL_RenderClear(this->_renderer);
 		this->_pixelBufferMutex.lock();
 		SDL_UpdateTexture(this->_texture, NULL, this->_pixelBuffer, this->_width*4);
