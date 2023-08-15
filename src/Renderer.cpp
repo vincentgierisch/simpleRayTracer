@@ -74,6 +74,7 @@ void Renderer::_initAlbedoCalculator() {
 }
 
 void Renderer::run() {
+    /*
     this->_framebuffer.buffer.for_each([&](unsigned x, unsigned y) {
                                         Color col = this->sample_pixel(x, y);
 										this->_framebuffer.add(x, y, col);
@@ -81,11 +82,27 @@ void Renderer::run() {
                                             this->_window->drawPixel(this->_framebuffer.buffer);
                                         }
     								});
-    this->_framebuffer.png().write(this->_outPath);
+    */
+    std::thread raytracingThread(&Renderer::_buildPicture, this);
     if (this->_displayType == DisplayType::Live) {
-        std::cout << "Finished rendering" << std::endl;
-        this->_window->waitTillClose();
+		raytracingThread.detach();
+        this->_window->mainLoop();
+        raytracingThread.join();
+    } else {
+        raytracingThread.join();
     }
+    std::cout << "Finished rendering" << std::endl;
+}
+
+void Renderer::_buildPicture() {
+    this->_framebuffer.buffer.for_each([&](unsigned x, unsigned y) {
+                                        Color col = this->sample_pixel(x, y);
+										this->_framebuffer.add(x, y, col);
+                                        if (this->_displayType == DisplayType::Live && x == 0) {
+                                            this->_window->drawPixel(this->_framebuffer.buffer);
+                                        }
+    								});
+    this->_framebuffer.png().write(this->_outPath);
 }
 
 Color Renderer::sample_pixel(unsigned int x, unsigned int y) {

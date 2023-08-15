@@ -11,6 +11,9 @@
 #include "Color.hpp"
 #include "FrameBuffer.hpp"
 
+#include <thread>
+#include <mutex>
+
 class Window {
     private:
         unsigned int _width, _height;
@@ -19,11 +22,13 @@ class Window {
         SDL_Window* _window;
         SDL_Renderer* _renderer;
         SDL_Texture* _texture;
+
+        std::mutex _pixelBufferMutex;
     public:
         Window(unsigned int width, unsigned int height);
         Window(){};
         void drawPixel(Buffer<Color>& buffer);
-        void waitTillClose();
+        void mainLoop();
         ~Window() {
             delete[] this->_pixelBuffer;
         };

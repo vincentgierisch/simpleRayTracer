@@ -32,32 +32,30 @@ Window::Window(unsigned int width, unsigned int height): _width(width), _height(
 };
 
 void Window::drawPixel(Buffer<Color>& buffer) {
-	// color to int
-	buffer.for_each([&](unsigned x, unsigned y) {
-        Color color(buffer(x,y));
-		color = glm_to_color(pow(clamp(color_to_glm(color), vec3(0), vec3(1)), vec3(1.0f/2.2f)) * 255.0f);
-		unsigned int hexColor = (((unsigned int)color.red & 0xff) << 24) + (((unsigned int)color.green & 0xff) << 16) + (((unsigned int)color.blue & 0xff) << 8) + (0xff & 0xff);
-        this->_pixelBuffer[x+((this->_height - y)*this->_width)] = hexColor;
-		// out[buffer.h - y - 1][x] = png::rgb_pixel(c.red, c.green, c.blue);
-	});
-	
-	SDL_RenderClear(this->_renderer);
-	SDL_UpdateTexture(this->_texture, NULL, this->_pixelBuffer, this->_width*4);
-	SDL_RenderCopy(this->_renderer, this->_texture, NULL, NULL);
-	SDL_RenderPresent(this->_renderer);
+	 for (unsigned y = 0; y < buffer.h; ++y) {
+		for (unsigned x = 0; x < buffer.w; ++x) {
+			Color color(buffer(x,y));
+			color = glm_to_color(pow(clamp(color_to_glm(color), vec3(0), vec3(1)), vec3(1.0f/2.2f)) * 255.0f);
+			unsigned int hexColor = (((unsigned int)color.red & 0xff) << 24) + (((unsigned int)color.green & 0xff) << 16) + (((unsigned int)color.blue & 0xff) << 8) + (0xff & 0xff);
+			this->_pixelBufferMutex.lock();
+			this->_pixelBuffer[x+((this->_height - y)*this->_width)] = hexColor;
+			this->_pixelBufferMutex.unlock();
+		}
+	}
 };
 
-void Window::waitTillClose() {
+void Window::mainLoop() {
   SDL_Event event;
-  SDL_PollEvent(&event);
   while(event.type != SDL_QUIT){
     while(SDL_PollEvent(&event)){
-       if (event.type == SDL_QUIT){
-          SDL_Quit();
-          return;
-       }
-          SDL_RenderPresent(this->_renderer);
-          SDL_Delay(50);            
+		
+		SDL_RenderClear(this->_renderer);
+		this->_pixelBufferMutex.lock();
+		SDL_UpdateTexture(this->_texture, NULL, this->_pixelBuffer, this->_width*4);
+		this->_pixelBufferMutex.unlock();
+		SDL_RenderCopy(this->_renderer, this->_texture, NULL, NULL);
+    	SDL_RenderPresent(this->_renderer);
+        SDL_Delay(50);            
     }
     SDL_Delay(100);
   }

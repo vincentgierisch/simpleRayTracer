@@ -36,8 +36,9 @@ class Buffer {
                 data[i] = to;
             }
         }
-    
+
         void for_each(const std::function<void(unsigned x, unsigned y)> &fn) const {
+            #pragma omp parallel for
             for (unsigned y = 0; y < h; ++y) {
                 for (unsigned x = 0; x < w; ++x) {
                     fn(x, y);

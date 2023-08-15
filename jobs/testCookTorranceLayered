@@ -13,7 +13,7 @@ up 0 1 0
 raytracer bvh
 
 load render-data/sibenik/sibenik.obj
-sppx 3
+sppx 32
 resolution 1280 720
 #pointlight pos 0 -4 0 col 35 30 26
 pointlight pos 7 -8 0 col 7 4 2
@@ -43,6 +43,6 @@ material roughness  0.50372
 material end
 
 default-brdf 4
-rendererType 1
+rendererType 0
 
 outfile outCookTorranceLayered.png

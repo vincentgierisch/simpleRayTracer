@@ -20,6 +20,8 @@
 #include "gi/localAC.h"
 #include "gi/directAC.h"
 
+#include <thread>
+
 using namespace glm;
 
 typedef enum RendererType {
@@ -40,7 +42,8 @@ class Renderer {
         DisplayType _displayType;
         Window* _window = nullptr;
         RendererType _type;
-
+        
+        void _buildPicture();
         void _initAlbedoCalculator();
         void _initRayTracer(std::string& rtype);
     public:
