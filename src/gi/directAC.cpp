@@ -25,8 +25,10 @@ Color DirectAlbedoCalculator::calculateAlbedo(HitPoint& hitpoint, Ray& ray, RayT
 
     if(intersection.isValid()) {
         HitPoint bouncedHitPoint(intersection);
-        vec3 c = color_to_glm(bouncedHitPoint.material->emissive) * hitpoint.material->brdf->f(hitpoint, -ray.direction, randomRay.direction) * cdot(randomRay.direction, hitpoint.norm) * 2.f * M_PIf;
-        resultColor = glm_to_color(c);
+        
+        Color radiance = bouncedHitPoint.material->emissive;
+
+        resultColor = radiance * hitpoint.material->brdf->f(hitpoint, -ray.direction, randomRay.direction) * cdot(randomRay.direction, hitpoint.norm) * 2.f * M_PIf;
     }
 
     return resultColor;

@@ -19,6 +19,7 @@
 #include "gi/albedoCalculator.h"
 #include "gi/localAC.h"
 #include "gi/directAC.h"
+#include "../include/utils/ProgressBar.h"
 
 #include <thread>
 
@@ -42,6 +43,9 @@ class Renderer {
         DisplayType _displayType;
         Window* _window = nullptr;
         RendererType _type;
+        ProgressBar _progressBar;
+
+        int _pixelsRendered = 0;
         
         void _buildPicture();
         void _initAlbedoCalculator();

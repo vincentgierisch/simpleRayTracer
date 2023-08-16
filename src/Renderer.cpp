@@ -8,17 +8,22 @@ void Renderer::init(std::string jobPath, DisplayType displayType) {
     this->_outPath = jd.OutPath;
     this->_type = (RendererType)jd.RendererType;
 
+    this->_width = unsigned(jd.Resolution.x);
+    this->_height = unsigned(jd.Resolution.y);
+
     if (this->_displayType == DisplayType::Live) {
-        this->_window = new Window(unsigned(jd.Resolution.x), unsigned(jd.Resolution.y));
+        this->_window = new Window(this->_width, this->_height);
     }
 
+    this->_progressBar = ProgressBar(0.05);
+
     // init framebuffer
-    this->_framebuffer = Framebuffer(int(jd.Resolution.x), int(jd.Resolution.y));
+    this->_framebuffer = Framebuffer(int(this->_width), int(this->_height));
     this->_framebuffer.clear();
 
     //init Scene
     Scene& scene = Scene::getInstance();
-    Camera camera(jd.CameraPosition, jd.CameraDirection, jd.CameraUp, 65, jd.Resolution.x, jd.Resolution.y);
+    Camera camera(jd.CameraPosition, jd.CameraDirection, jd.CameraUp, 65, int(this->_width), int(this->_height));
     scene.camera = camera;
     scene.DefaultBrdfType = (BrdfType) jd.DefaultBrdf;
     scene.Brdfs.emplace(std::make_pair(scene.DefaultBrdfType, BrdfFabric::getBrdf(scene.DefaultBrdfType)));
@@ -83,6 +88,7 @@ void Renderer::run() {
                                         }
     								});
     */
+    this->_progressBar.init();
     std::thread raytracingThread(&Renderer::_buildPicture, this);
     if (this->_displayType == DisplayType::Live) {
 		raytracingThread.detach();
@@ -91,17 +97,18 @@ void Renderer::run() {
     } else {
         raytracingThread.join();
     }
-    std::cout << "Finished rendering" << std::endl;
+    std::cout << std::endl << "Finished rendering" << std::endl;
 }
 
 void Renderer::_buildPicture() {
     this->_framebuffer.buffer.for_each([&](unsigned x, unsigned y) {
-                                        Color col = this->sample_pixel(x, y);
-										this->_framebuffer.add(x, y, col);
-                                        if (this->_displayType == DisplayType::Live && x == 0) {
-                                            this->_window->drawPixel(this->_framebuffer.buffer);
-                                        }
-    								});
+        Color col = this->sample_pixel(x, y);
+        this->_progressBar.setProgress(++this->_pixelsRendered/(float)(this->_width * this->_height));
+        this->_framebuffer.add(x, y, col);
+        if (this->_displayType == DisplayType::Live && x == 0) {
+            this->_window->drawPixel(this->_framebuffer.buffer);
+        }
+    });
     this->_framebuffer.png().write(this->_outPath);
 }
 

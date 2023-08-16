@@ -15,7 +15,9 @@ class Color {
         Color(float r, float g, float b, float alpha): red(r), green(g), blue(b), alpha(alpha) {};
         Color operator * (float d) {return Color(red*d, green*d, blue*d);}
         Color operator / (float d) {return Color(red/d, green/d, blue/d);}
-        Color operator * (Color c) {return Color(this->red * c.red, this->green * c.green, this->blue * c.blue); }
+        Color operator * (Color& c) {return Color(this->red * c.red, this->green * c.green, this->blue * c.blue); }
+        Color operator * (vec3 c) {return Color(this->red * c.x, this->green * c.y, this->blue * c.z); }
+        bool operator != (Color c) {return !(this->red == c.red && this->green == c.green && this->blue == c.blue);}
         void clamp255();
 };
 
