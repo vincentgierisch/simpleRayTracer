@@ -97,7 +97,9 @@ void Renderer::run() {
     } else {
         raytracingThread.join();
     }
-    std::cout << std::endl << "Finished rendering" << std::endl;
+    // make sure Progressbar finishes
+    this->_progressBar.setProgress(1);
+    std::cout << "Finished rendering" << std::endl;
 }
 
 void Renderer::_buildPicture() {
