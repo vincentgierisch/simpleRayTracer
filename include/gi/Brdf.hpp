@@ -5,6 +5,7 @@
 #include "../Color.hpp"
 #include <glm/glm.hpp>
 #include <string>
+#include "../utils/utils.hpp"
 
 using namespace glm;
 
@@ -16,10 +17,7 @@ class Brdf {
         float fresnel (float cosThetaI, float n1, float n2);
         float ggx(float cosThetaH, float roughness);
         float ggxG(float cosThetaH, float roughness);
-        inline float cdot(const vec3 &a, const vec3 &b) {
-            float x = a.x*b.x + a.y*b.y + a.z*b.z;
-            return x < 0.0f ? 0.0f : x;
-        }
+        
         inline float absdot(const vec3 &a, const vec3 &b) {
             float x = a.x*b.x + a.y*b.y + a.z*b.z;
             return x < 0.0f ? -x : x;

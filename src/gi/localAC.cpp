@@ -1,6 +1,9 @@
 #include "../../include/gi/localAC.h"
 
 Color LocalAlbedoCalculator::calculateAlbedo(HitPoint& hitpoint, Ray& ray, RayTracer* rt) {
+    if (color_to_glm(hitpoint.material->emissive) != vec3(0)) {
+        return Color(0.592f, 0.902f, 0.941f);
+    }
     std::vector<Color> colors;
     for (Pointlight& pointlight : Scene::getInstance().Pointlights) {
         Color resultColor(0, 0, 0);
