@@ -61,4 +61,18 @@ inline vec3 alignVectorToAxis(const glm::vec3& vectorToAlign, const glm::vec3& a
     */
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsequence-point"
+inline void test_vector(std::vector<std::pair<vec3, vec3>>& rays, std::string outPath) {
+	std::ofstream out(outPath);
+	unsigned int i = 1;
+
+    for (std::pair<vec3, vec3>& ray : rays) {
+        out << "v " << ray.first.x << " " << ray.first.y << " " << ray.first.z << std::endl;
+        out << "v " << ray.second.x << " " << ray.second.y << " " << ray.second.z << std::endl;
+        out << "l " << i++ << " " << i++ << std::endl;
+    }
+}
+#pragma GCC diagnostic pop
+
 #endif

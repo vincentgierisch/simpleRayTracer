@@ -119,16 +119,35 @@ void Renderer::_buildPicture() {
 Color Renderer::sample_pixel(unsigned int x, unsigned int y) {
     std::vector<Color> result;
 
+    std::vector<std::pair<vec3, vec3>> rays;
+
     for (unsigned int sample = 0; sample < this->_sspx; ++sample){
         Color sampleColor(0, 0, 0);
         Ray ray = Scene::getInstance().camera.spawnRay(x, y, vec2(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX)));
         TriangleIntersection intersection = this->_rayTracer->closest_hit(ray);
         if (intersection.isValid()) {
             HitPoint hitPoint(intersection);
-            sampleColor = this->_albedoCalculator->calculateAlbedo(hitPoint, ray, this->_rayTracer);
+
+            float z1 = random_float(0, 0.9999f);
+            float z2 = random_float(0, 0.9999f);
+
+            float sinTheta = sqrtf(1.f-(z1*z1));
+            float phi = 2.f*M_PIf*z2;
+
+            vec3 wi = vec3(sinTheta*cosf(phi),
+                            sinTheta*sinf(phi),
+                            z1);
+            // wi is just aligned to the basic hemisphere at (0,0), we need to align it to the normal
+            wi = alignVectorToAxis(wi, hitPoint.norm);
+            //wi = wi - hitPoint.norm;
+            vec3 test = hitPoint.x;
+            std::pair<vec3, vec3> ray = std::make_pair(test, wi);
+            rays.push_back(ray);
+            // sampleColor = this->_albedoCalculator->calculateAlbedo(hitPoint, ray, this->_rayTracer);
         }
         result.push_back(sampleColor);
     }
+    test_vector(rays, "test.obj");
 
     return getAverageColor(result);
 }

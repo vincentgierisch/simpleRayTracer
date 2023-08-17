@@ -37,18 +37,3 @@ class Camera{
             return Ray(this->_position, normalize(this->_direction + this->_u*u + this->_v*v));
         }
 };
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsequence-point"
-inline void test_camrays(Camera &camera, int stride) {
-	std::ofstream out("test.obj");
-	int i = 1;
-	for (int y = 0; y < camera.Height; y += stride)
-		for (int x = 0; x < camera.Width; x += stride) {
-			Ray ray = camera.spawnRay(x, y, vec2(0, 0));
-			out << "v " << ray.origin.x << " " << ray.origin.y << " " << ray.origin.z << std::endl;
-			out << "v " << ray.direction.x << " " << ray.direction.y << " " << ray.direction.z << std::endl;
-			out << "l " << i++ << " " << i++ << std::endl;
-		}
-}
-#pragma GCC diagnostic pop
