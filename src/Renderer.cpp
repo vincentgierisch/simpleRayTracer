@@ -30,7 +30,7 @@ void Renderer::init(std::string jobPath, DisplayType displayType) {
 
 
     for (JobData::PointLightData& pld : jd.PointLights) {
-        Pointlight pl(pld.Position, glm_to_color(pld.Color));
+        Pointlight pl(pld.Position, pld.Color);
         scene.Pointlights.push_back(pl);
     }
 
@@ -41,11 +41,13 @@ void Renderer::init(std::string jobPath, DisplayType displayType) {
         if (jd.Materials.count(material.name)) {
             JobData::MaterialData& md = jd.Materials[material.name];
             if (md.isAlbedoSet())
-                material.albedo = glm_to_color(md.getAlbedo());
+                material.albedo = md.getAlbedo();
             if (md.isIorSet())
                 material.ior = md.getIor();
             if (md.isRoughnessSet())
                 material.roughness = md.getRoughness();
+            if (md.isEmissiveSet())
+                material.emissive = md.getEmissive();
         }
     }
 

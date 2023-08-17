@@ -35,7 +35,7 @@ void Window::drawPixel(Buffer<Color>& buffer) {
 	 for (unsigned y = 0; y < buffer.h; ++y) {
 		for (unsigned x = 0; x < buffer.w; ++x) {
 			Color color(buffer(x,y));
-			color = glm_to_color(pow(clamp(color_to_glm(color), vec3(0), vec3(1)), vec3(1.0f/2.2f)) * 255.0f);
+			color = pow(clamp(color_to_glm(color), vec3(0), vec3(1)), vec3(1.0f/2.2f)) * 255.0f;
 			unsigned int hexColor = (((unsigned int)color.red & 0xff) << 24) + (((unsigned int)color.green & 0xff) << 16) + (((unsigned int)color.blue & 0xff) << 8) + (0xff & 0xff);
 			this->_pixelBufferMutex.lock();
 			this->_pixelBuffer[x+((this->_height - y)*this->_width)] = hexColor;

@@ -1,19 +1,28 @@
-#at -10 -10 0
-#look 1 0 0
-#up 0 1 0
 
+# look inside (standart)
 #at -13 -13 0
 #look 1 0 0
 #up 0 1 0
 
-at -10 0 0
+# rosetta
+#at -10 0 0
+#look -1 0 0
+#up 0 1 0
+
+#thronesteps
+at 1 -12.5 1
+look 1 0 0
+up 0 1 0
+
+# door
+at 2 -14 0
 look -1 0 0
 up 0 1 0
 
 raytracer bvh
 
 load render-data/sibenik/sibenik.obj
-sppx 32
+sppx 50
 resolution 1280 720
 #pointlight pos 0 -4 0 col 35 30 26
 pointlight pos 7 -8 0 col 7 4 2
@@ -42,7 +51,27 @@ material ior 1.3
 material roughness  0.50372
 material end
 
+material select staklo
+material emissive 7.8431 7.8431 7.8431
+material end
+        
+material select staklo_crveno
+material emissive 50.118 8.392 0.562
+material end
+        
+material select staklo_plavo
+material emissive 1.61177 2.82549 16.9216
+material end
+        
+material select staklo_zeleno
+material emissive 1.9 18.3 2.15
+material end
+        
+#material select staklo_zuto
+#material emissive 37.5 32.2 0.3
+
+
 default-brdf 4
-rendererType 0
+rendererType 1
 
 outfile outCookTorranceLayered.png

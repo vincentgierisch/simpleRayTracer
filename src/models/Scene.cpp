@@ -62,7 +62,7 @@ void Scene::load(const std::string path) {
 		else
             material.albedo = colorSpecular;
 
-        material.albedo = glm_to_color(pow(color_to_glm(material.albedo), vec3(2.2f, 2.2f, 2.2f)));
+        material.albedo = pow(color_to_glm(material.albedo), vec3(2.2f, 2.2f, 2.2f));
 		material.emissive = colorEmissive;
 
         // Load image

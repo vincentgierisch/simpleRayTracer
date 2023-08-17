@@ -11,7 +11,7 @@ png::image<png::rgb_pixel> Framebuffer::png() const {
         Color c(buffer(x,y));
 		// http://www.libpng.org/pub/png/book/chapter10.html
 		float gammaExp = 2.2f;
-		c = glm_to_color(pow(clamp(color_to_glm(c), vec3(0), vec3(1)), vec3(1.0f/gammaExp)) * 255.0f);
+		c = pow(clamp(color_to_glm(c), vec3(0), vec3(1)), vec3(1.0f/gammaExp)) * 255.0f;
         out[buffer.h - y - 1][x] = png::rgb_pixel(c.red, c.green, c.blue);
 	});
 	return out;

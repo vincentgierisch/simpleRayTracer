@@ -13,6 +13,7 @@ class Color {
         Color(): red(0), green(0), blue(0){};
         Color(float r, float g, float b): red(r), green(g), blue(b) {};
         Color(float r, float g, float b, float alpha): red(r), green(g), blue(b), alpha(alpha) {};
+        Color(const vec3& v) : red(v.x), green(v.y), blue(v.z) {};
         Color operator * (float d) {return Color(red*d, green*d, blue*d);}
         Color operator / (float d) {return Color(red/d, green/d, blue/d);}
         Color operator * (Color& c) {return Color(this->red * c.red, this->green * c.green, this->blue * c.blue); }

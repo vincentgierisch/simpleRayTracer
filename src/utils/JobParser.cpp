@@ -74,6 +74,10 @@ JobData JobParser::parse(std::string path) {
                 float roughness;
                 in >> roughness;
                 md.setRoughness(roughness);
+            } else if (cmd == "emissive") {
+                vec3 emissive;
+                in >> emissive;
+                md.setEmissive(emissive);
             } else {
                 throw std::runtime_error("ERROR: unknown material command: " + cmd);
             }
