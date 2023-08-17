@@ -16,8 +16,8 @@ Color DirectAlbedoCalculator::calculateAlbedo(HitPoint& hitpoint, Ray& ray, RayT
     vec3 wi = vec3(sinTheta*cosf(phi),
                     sinTheta*sinf(phi),
                     z1);
-
-    wi = align(wi, hitpoint.norm);
+    // wi is just aligned to the basic hemisphere at (0,0), we need to align it to the normal
+    wi = alignVectorToAxis(wi, hitpoint.norm);
     Ray randomRay(hitpoint.x, wi);
     randomRay.setMax(1000.f);
 

@@ -42,12 +42,23 @@ inline float cdot(const vec3 &a, const vec3 &b) {
     return x < 0.0f ? 0.0f : x;
 }
 
-inline vec3 align(const vec3& v, const vec3& axis) {
+// Function to align 'vectorToAlign' with 'axisVector'
+inline vec3 alignVectorToAxis(const glm::vec3& vectorToAlign, const glm::vec3& axis) {
+    const float s = copysign(1.f, axis.z);
+    const glm::vec3 w = glm::vec3(vectorToAlign.x, vectorToAlign.y, vectorToAlign.z * s);
+    
+    const glm::vec3 h = glm::vec3(axis.x, axis.y, axis.z+s);
+    const float k = glm::dot(w, h) / (1.f + (axis.z < 0 ? -axis.z : axis.z));
+    
+    return k * h - w;
+    /*
     const float s = copysign(1.f, axis.z);
     const vec3 w = vec3(v.x, v.y, v.z * s);
+    
     const vec3 h = vec3(axis.x, axis.y, axis.z + s);
     const float k = dot(w, h) / (1.f + (axis.z < 0 ? -axis.z : axis.z));
     return k * h - w;
+    */
 }
 
 #endif
