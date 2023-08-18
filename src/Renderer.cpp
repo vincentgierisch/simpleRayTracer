@@ -127,7 +127,9 @@ Color Renderer::sample_pixel(unsigned int x, unsigned int y) {
         TriangleIntersection intersection = this->_rayTracer->closest_hit(ray);
         if (intersection.isValid()) {
             HitPoint hitPoint(intersection);
-
+            if (sample == 0) {
+                std::cout << hitPoint.x.x << "|" << hitPoint.x.y << "|" << hitPoint.x.z << std::endl;
+            }
             float z1 = random_float(0, 0.9999f);
             float z2 = random_float(0, 0.9999f);
 
@@ -138,10 +140,19 @@ Color Renderer::sample_pixel(unsigned int x, unsigned int y) {
                             sinTheta*sinf(phi),
                             z1);
             // wi is just aligned to the basic hemisphere at (0,0), we need to align it to the normal
-            wi = alignVectorToAxis(wi, hitPoint.norm);
-            //wi = wi - hitPoint.norm;
-            vec3 test = hitPoint.x;
-            std::pair<vec3, vec3> ray = std::make_pair(test, wi);
+            const float s = copysign(1.f, hitPoint.norm.z);
+            const glm::vec3 w = glm::vec3(wi.x, wi.y, wi.z * s);
+            
+            const glm::vec3 h = glm::vec3(hitPoint.norm.x, hitPoint.norm.y, hitPoint.norm.z+s);
+            const float k = glm::dot(w, h) / (1.f + (hitPoint.norm.z < 0 ? -hitPoint.norm.z : hitPoint.norm.z));
+    
+            vec3 res = w - k * h;
+            vec3 wi1 = wi-hitPoint.norm;
+
+
+            Ray randomRay(hitPoint.x, res);
+
+            std::pair<vec3, vec3> ray = std::make_pair(randomRay.origin, randomRay.direction);
             rays.push_back(ray);
             // sampleColor = this->_albedoCalculator->calculateAlbedo(hitPoint, ray, this->_rayTracer);
         }
