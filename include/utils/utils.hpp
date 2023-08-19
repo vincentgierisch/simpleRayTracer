@@ -42,23 +42,16 @@ inline float cdot(const vec3 &a, const vec3 &b) {
     return x < 0.0f ? 0.0f : x;
 }
 
-// Function to align 'vectorToAlign' with 'axisVector'
-inline vec3 alignVectorToAxis(const glm::vec3& vectorToAlign, const glm::vec3& axis) {
-    const float s = copysign(1.f, axis.z);
-    const glm::vec3 w = glm::vec3(vectorToAlign.x, vectorToAlign.y, vectorToAlign.z * s);
-    
-    const glm::vec3 h = glm::vec3(axis.x, axis.y, axis.z+s);
-    const float k = glm::dot(w, h) / (1.f + (axis.z < 0 ? -axis.z : axis.z));
-    
-    return k * h - w;
-    /*
-    const float s = copysign(1.f, axis.z);
-    const vec3 w = vec3(v.x, v.y, v.z * s);
-    
-    const vec3 h = vec3(axis.x, axis.y, axis.z + s);
-    const float k = dot(w, h) / (1.f + (axis.z < 0 ? -axis.z : axis.z));
-    return k * h - w;
-    */
+// Tom Duff
+inline vec3 toWorldSpace(const vec3& vec, const vec3& norm) {
+    // wi is just aligned to the basic hemisphere at (0,0), we need to align it to the normal
+    float sign = std::copysignf (1.0f , norm.z);
+    float a = -1.0f / (sign + norm.z);
+    float b = norm.x * norm.y * a ;
+    vec3 tangent = vec3(1.0f + sign * norm.x * norm.x * a, sign * b, -sign * norm.x);
+    vec3 bitangent = vec3(b, sign + norm.y * norm.y * a, - norm.y);
+
+    return tangent * vec.x + bitangent * vec.y + norm * vec.z;
 }
 
 #endif
