@@ -7,8 +7,14 @@
 #include "../models/TriangleIntersection.hpp"
 
 class DirectAlbedoCalculator : public AlbedoCalculator {
-    Color calculateAlbedo(HitPoint& hitpoint, Ray& ray, RayTracer* rt) override;
-    ~DirectAlbedoCalculator() override;
+    private:
+        vec3 getRandomVecOnHemisphere(const vec3& norm);
+        vec3 getRandomVecOnHemisphereCosineWeighted(const vec3& norm);
+        vec3 getRandomVecOnHemispherePhongWeighted(const vec3& norm, float n);
+        vec3 getRandomVecOnHemisphereGGXWeighted(const vec3& norm, float n, float a);
+    public:
+        Color calculateAlbedo(HitPoint& hitpoint, Ray& ray, RayTracer* rt) override;
+        ~DirectAlbedoCalculator() override;
 };
 
 #endif
