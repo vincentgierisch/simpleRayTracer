@@ -2,7 +2,8 @@
 
 Color DirectAlbedoCalculator::calculateAlbedo(HitPoint& hitpoint, Ray& ray, RayTracer* rt) {
     if (color_to_glm(hitpoint.material->emissive) != vec3(0)) {
-        return Color(0.592f, 0.902f, 0.941f);
+        // return Color(0.592f, 0.902f, 0.941f);
+        return Color(1, 1, 1);
     }
 
     Color resultColor(0, 0, 0);
@@ -10,7 +11,7 @@ Color DirectAlbedoCalculator::calculateAlbedo(HitPoint& hitpoint, Ray& ray, RayT
     float expo = exponent_from_roughness(hitpoint.material->roughness);
     float a = hitpoint.material->ior;
 
-    vec3 wi = this->getRandomVecOnHemisphereGGXWeighted(hitpoint.norm, expo, a);
+    auto[wi, pdf] = this->getRandomVecOnHemisphereGGXWeighted(hitpoint.norm, expo, a);
     Ray randomRay(hitpoint.x, wi);
     randomRay.setMax(1000.f);
 
@@ -21,13 +22,14 @@ Color DirectAlbedoCalculator::calculateAlbedo(HitPoint& hitpoint, Ray& ray, RayT
         
         Color radiance = bouncedHitPoint.material->emissive;
 
-        resultColor = radiance * hitpoint.material->brdf->f(hitpoint, -ray.direction, randomRay.direction) * cdot(randomRay.direction, hitpoint.norm) * 2.f * M_PIf;
+        // resultColor = radiance * hitpoint.material->brdf->f(hitpoint, -ray.direction, randomRay.direction) * cdot(randomRay.direction, hitpoint.norm) * (1.f/pdf);
+        resultColor = radiance * hitpoint.material->brdf->f(hitpoint, -ray.direction, randomRay.direction) * (1.f/pdf);
     }
 
     return resultColor;
 }
 
-vec3 DirectAlbedoCalculator::getRandomVecOnHemisphere(const vec3& norm) {
+std::pair<vec3, float> DirectAlbedoCalculator::getRandomVecOnHemisphere(const vec3& norm) {
     float z1 = random_float(0, 0.9999f);
     float z2 = random_float(0, 0.9999f);
 
@@ -38,24 +40,27 @@ vec3 DirectAlbedoCalculator::getRandomVecOnHemisphere(const vec3& norm) {
                     sinTheta*sinf(phi),
                     z1);
     // wi is just aligned to the basic hemisphere at (0,0), we need to align it to the normal
-    return toWorldSpace(wi, norm);
+    return {toWorldSpace(wi, norm), 1.f/(2.f*M_PI)};
 }
 
-vec3 DirectAlbedoCalculator::getRandomVecOnHemisphereCosineWeighted(const vec3& norm) {
+std::pair<vec3, float> DirectAlbedoCalculator::getRandomVecOnHemisphereCosineWeighted(const vec3& norm) {
     float z1 = random_float(0, 0.9999f);
     float z2 = random_float(0, 0.9999f);
 
     float phi = 2.f*M_PIf*z1;
-    float sqrtZ2 = sqrt(z2);
+    float theta = asinf(sqrtf(z2));
 
-    vec3 wi = vec3(cos(phi)*sqrtZ2,
-                    sin(phi)*sqrtZ2,
-                    sqrt(1-z2));
+    float sinTheta = sinf(theta);
+    float cosTheta = cosf(theta);
 
-    return toWorldSpace(wi, norm);
+    vec3 wi = vec3(sinTheta * cosf(phi),
+                    sinTheta * sinf(phi),
+                    cosTheta);
+
+    return {toWorldSpace(wi, norm), (1.f/M_PI)*cosTheta*sinTheta};
 }
 
-vec3 DirectAlbedoCalculator::getRandomVecOnHemispherePhongWeighted(const vec3& norm, float n) {
+std::pair<vec3, float> DirectAlbedoCalculator::getRandomVecOnHemispherePhongWeighted(const vec3& norm, float n) {
     float z1 = random_float(0, 0.9999f);
     float z2 = random_float(0, 0.9999f);
 
@@ -68,10 +73,10 @@ vec3 DirectAlbedoCalculator::getRandomVecOnHemispherePhongWeighted(const vec3& n
         cos(theta)
     );
     
-    return toWorldSpace(wi, norm);
+    return {toWorldSpace(wi, norm), (((n+1.f)/(2.f*M_PI))*powf(cosf(theta), n)*sinf(theta))};
 }
 
-vec3 DirectAlbedoCalculator::getRandomVecOnHemisphereGGXWeighted(const vec3& norm, float n, float a) {
+std::pair<vec3, float> DirectAlbedoCalculator::getRandomVecOnHemisphereGGXWeighted(const vec3& norm, float n, float a) {
     float z1 = random_float(0, 0.9999f);
     float z2 = random_float(0, 0.9999f);
 
@@ -84,7 +89,7 @@ vec3 DirectAlbedoCalculator::getRandomVecOnHemisphereGGXWeighted(const vec3& nor
         cos(theta)
     );
     
-    return toWorldSpace(wi, norm);
+    return {toWorldSpace(wi, norm), cosf(theta)*sinf(theta)};
 }
 
 
