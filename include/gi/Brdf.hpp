@@ -23,12 +23,14 @@ class Brdf {
             return x < 0.0f ? -x : x;
         }
         virtual vec3 f(HitPoint& hp, vec3 wi, vec3 wo) = 0;
+        virtual float getPdf(HitPoint& hp, vec3 wi, vec3 wo) = 0;
         virtual ~Brdf() = default;
 };
 
 class LambertianBrdf : public Brdf {
     public:
         vec3 f(HitPoint& hp, vec3 wi, vec3 wo) override;
+        float getPdf(HitPoint& hp, vec3 wi, vec3 wo) override;
 }; 
 
 
@@ -39,6 +41,8 @@ class PhongBrdf : public Brdf {
     public:
         PhongBrdf(bool isCoat = false):_isCoat(isCoat){};
         vec3 f(HitPoint& hp, vec3 wi, vec3 wo) override;
+        float getPdf(HitPoint& hp, vec3 wi, vec3 wo) override;
+
 };
 
 class CookTorranceBrdf : public Brdf {
@@ -47,6 +51,7 @@ class CookTorranceBrdf : public Brdf {
     public:
         CookTorranceBrdf(bool isCoat = false):_isCoat(isCoat){};
         vec3 f(HitPoint& hp, vec3 wi, vec3 wo) override;
+        float getPdf(HitPoint& hp, vec3 wi, vec3 wo) override;
 };
 
 class LayeredBrdf : public Brdf {
@@ -56,6 +61,7 @@ class LayeredBrdf : public Brdf {
     public:
         LayeredBrdf(Brdf* core, Brdf* coat): Core(core), Coat(coat) {};
         vec3 f(HitPoint& hp, vec3 wi, vec3 wo) override;
+        float getPdf(HitPoint& hp, vec3 wi, vec3 wo) override;
         ~LayeredBrdf() {
             delete Core;
             delete Coat;

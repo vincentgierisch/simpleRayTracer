@@ -39,6 +39,11 @@ vec3 LambertianBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
     return OneOverPi * color_to_glm(hp.albedo());
 }
 
+// https://boksajak.github.io/files/CrashCourseBRDF.pdf
+float LambertianBrdf::getPdf(HitPoint& hp, vec3 wi, vec3 wo) {
+    return absdot(hp.norm, wi) * (float)M_1_PI;
+}
+
 vec3 PhongBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
     if (dot(wi, hp.norm) <= 0) return vec3(0);
 

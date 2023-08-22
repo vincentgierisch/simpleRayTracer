@@ -1,8 +1,8 @@
 
 # look inside (standart)
-#at -13 -13 0
-#look 1 0 0
-#up 0 1 0
+at -13 -13 0
+look 1 0 0
+up 0 1 0
 
 # rosetta
 #at -10 0 0
@@ -10,9 +10,9 @@
 #up 0 1 0
 
 #thronesteps
-at 1 -12.5 1
-look 1 0 0
-up 0 1 0
+#at 1 -12.5 1
+#look 1 0 0
+#up 0 1 0
 
 # door
 at 2 -14 0
@@ -22,7 +22,7 @@ up 0 1 0
 raytracer bvh
 
 load render-data/sibenik/sibenik.obj
-sppx 1000
+sppx 50
 resolution 1280 720
 #pointlight pos 0 -4 0 col 35 30 26
 pointlight pos 7 -8 0 col 7 4 2

@@ -11,7 +11,7 @@ Color DirectAlbedoCalculator::calculateAlbedo(HitPoint& hitpoint, Ray& ray, RayT
     float expo = exponent_from_roughness(hitpoint.material->roughness);
     float a = hitpoint.material->ior;
 
-    auto[wi, pdf] = this->getRandomVecOnHemisphereGGXWeighted(hitpoint.norm, expo, a);
+    auto[wi, pdf] = this->getRandomVecOnHemisphere(hitpoint.norm);
     Ray randomRay(hitpoint.x, wi);
     randomRay.setMax(1000.f);
 
