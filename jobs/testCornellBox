@@ -12,7 +12,6 @@ pointlight pos 0.884011 4.318497 -3.567968 col 35 30 26
 
 material select Khaki
 #material albedo  0.54627 0.21961 0.18392
-material roughness 1.3
 material ior  1.3
 material end
 
