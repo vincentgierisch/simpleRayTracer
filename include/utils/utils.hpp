@@ -6,7 +6,7 @@
 inline float roughness_from_exponent(float exponent) {
     return sqrtf(2.f / (exponent + 2.f));
 }
-inline float exponent_from_roughness(float roughness) {
+inline float exponentFromRoughness(float roughness) {
     return 2.f / (roughness * roughness) - 2.f;
 }
 
@@ -22,6 +22,10 @@ inline float random_float(float min, float max) {
 
 inline vec3 randomVec3() {
     return vec3(random_float(), random_float(), random_float());
+}
+
+inline vec2 randomVec2(float min, float max) {
+    return vec2(random_float(min, max), random_float(min, max));
 }
 
 inline vec3 randomVec3(double min, double max) {

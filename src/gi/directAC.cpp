@@ -8,10 +8,13 @@ Color DirectAlbedoCalculator::calculateAlbedo(HitPoint& hitpoint, Ray& ray, RayT
 
     Color resultColor(0, 0, 0);
 
-    float expo = exponent_from_roughness(hitpoint.material->roughness);
+    float expo = exponentFromRoughness(hitpoint.material->roughness);
     float a = hitpoint.material->ior;
 
-    auto[wi, pdf] = this->getRandomVecOnHemisphere(hitpoint.norm);
+    // auto[wi, pdf] = this->getRandomVecOnHemisphere(hitpoint.norm);
+    vec2 rndmVec = randomVec2(0, 0.9999f);
+    vec3 wi = hitpoint.material->brdf->getSample(hitpoint, -ray.direction, rndmVec);
+    float pdf = hitpoint.material->brdf->getPdf(hitpoint, wi, -ray.direction);
     Ray randomRay(hitpoint.x, wi);
     randomRay.setMax(1000.f);
 
@@ -23,7 +26,7 @@ Color DirectAlbedoCalculator::calculateAlbedo(HitPoint& hitpoint, Ray& ray, RayT
         Color radiance = bouncedHitPoint.material->emissive;
 
         // resultColor = radiance * hitpoint.material->brdf->f(hitpoint, -ray.direction, randomRay.direction) * cdot(randomRay.direction, hitpoint.norm) * (1.f/pdf);
-        resultColor = radiance * hitpoint.material->brdf->f(hitpoint, -ray.direction, randomRay.direction) * (1.f/pdf);
+        resultColor = radiance * hitpoint.material->brdf->f(hitpoint, -ray.direction, randomRay.direction) * cdot(randomRay.direction, hitpoint.norm) * (1.f/pdf);
     }
 
     return resultColor;

@@ -7,10 +7,13 @@
 #include <string>
 #include "../utils/utils.hpp"
 
+#include <exception>
+
 using namespace glm;
 
 class HitPoint;
 
+// https://pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Sampling_Reflection_Functions
 class Brdf {
     public:
         const float OneOverPi = (1.0f / M_PI);
@@ -23,14 +26,16 @@ class Brdf {
             return x < 0.0f ? -x : x;
         }
         virtual vec3 f(HitPoint& hp, vec3 wi, vec3 wo) = 0;
-        virtual float getPdf(HitPoint& hp, vec3 wi, vec3 wo) = 0;
+        virtual float getPdf(const HitPoint& hp, const vec3& wi, const vec3& wo) = 0;
+        virtual vec3 getSample(HitPoint& hp, const vec3& wo, const vec2& rndm) = 0;
         virtual ~Brdf() = default;
 };
 
 class LambertianBrdf : public Brdf {
     public:
         vec3 f(HitPoint& hp, vec3 wi, vec3 wo) override;
-        float getPdf(HitPoint& hp, vec3 wi, vec3 wo) override;
+        float getPdf(const HitPoint& hp, const vec3& wi, const vec3& wo) override;
+        vec3 getSample(HitPoint& hp, const vec3& wo, const vec2& rndm) override;
 }; 
 
 
@@ -41,7 +46,8 @@ class PhongBrdf : public Brdf {
     public:
         PhongBrdf(bool isCoat = false):_isCoat(isCoat){};
         vec3 f(HitPoint& hp, vec3 wi, vec3 wo) override;
-        float getPdf(HitPoint& hp, vec3 wi, vec3 wo) override;
+        float getPdf(const HitPoint& hp, const vec3& wi, const vec3& wo) override;
+        vec3 getSample(HitPoint& hp, const vec3& wo, const vec2& rndm) override;
 
 };
 
@@ -51,7 +57,8 @@ class CookTorranceBrdf : public Brdf {
     public:
         CookTorranceBrdf(bool isCoat = false):_isCoat(isCoat){};
         vec3 f(HitPoint& hp, vec3 wi, vec3 wo) override;
-        float getPdf(HitPoint& hp, vec3 wi, vec3 wo) override;
+        float getPdf(const HitPoint& hp, const vec3& wi, const vec3& wo) override;
+        vec3 getSample(HitPoint& hp, const vec3& wo, const vec2& rndm) override;
 };
 
 class LayeredBrdf : public Brdf {
@@ -61,7 +68,8 @@ class LayeredBrdf : public Brdf {
     public:
         LayeredBrdf(Brdf* core, Brdf* coat): Core(core), Coat(coat) {};
         vec3 f(HitPoint& hp, vec3 wi, vec3 wo) override;
-        float getPdf(HitPoint& hp, vec3 wi, vec3 wo) override;
+        float getPdf(const HitPoint& hp, const vec3& wi, const vec3& wo) override;
+        vec3 getSample(HitPoint& hp, const vec3& wo, const vec2& rndm) override;
         ~LayeredBrdf() {
             delete Core;
             delete Coat;
@@ -78,6 +86,7 @@ class BrdfFabric {
                     break;
                 }
                 case BrdfType::Phong: {
+                    return new PhongBrdf;
                     break;
                 }
                 case BrdfType::Layered: {

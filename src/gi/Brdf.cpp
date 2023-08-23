@@ -27,7 +27,6 @@ float Brdf::ggx(float cosThetaH, float roughness) {
 }
 
 float Brdf::ggxG(float cosThetaH, float roughness) {
-
     if (cosThetaH <= 0) return 0.f;
     float sRoughness = roughness * roughness;
     float cosSThetaH = cosThetaH * cosThetaH;
@@ -39,24 +38,83 @@ vec3 LambertianBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
     return OneOverPi * color_to_glm(hp.albedo());
 }
 
+vec3 LambertianBrdf::getSample(HitPoint& hp, const vec3& wo, const vec2& rndm) {
+    float phi = 2.f*M_PIf*rndm.x;
+    float theta = asinf(sqrtf(rndm.y));
+
+    float sinTheta = sinf(theta);
+    float cosTheta = cosf(theta);
+
+    vec3 wi = vec3(sinTheta * cosf(phi),
+                    sinTheta * sinf(phi),
+                    cosTheta);
+
+    return toWorldSpace(wi, hp.norm);
+}
+
 // https://boksajak.github.io/files/CrashCourseBRDF.pdf
-float LambertianBrdf::getPdf(HitPoint& hp, vec3 wi, vec3 wo) {
+float LambertianBrdf::getPdf(const HitPoint& hp, const vec3& wi, const vec3& wo) {
     return absdot(hp.norm, wi) * (float)M_1_PI;
 }
 
 vec3 PhongBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
     if (dot(wi, hp.norm) <= 0) return vec3(0);
 
-	float exponent = exponent_from_roughness(hp.material->roughness);
+	float exponent = exponentFromRoughness(hp.material->roughness);
 	vec3 wr = 2.0f*hp.norm*dot(wi,hp.norm)-wi;
-    float norm = (exponent + 2.0f) / (2.0f * M_PIf32);
+    float norm = (exponent + 1.f) / (2.0f * M_PIf32);
     return (float)(powf(cdot(wr, wo), exponent) * norm * cdot(wi,hp.norm)) * (this->_isCoat ? vec3(1) : color_to_glm(hp.albedo()));
+}
+
+float PhongBrdf::getPdf(const HitPoint& hp, const vec3& wi, const vec3& wo) {
+    float exp = exponentFromRoughness(hp.material->roughness);
+    float cosTheta = absdot(hp.norm, wi);
+    return powf(cosTheta,exp) * (exp+1.0f) * M_2_PI;
+}
+
+vec3 PhongBrdf::getSample(HitPoint& hp, const vec3& wo, const vec2& rndm) {
+    float exp = exponentFromRoughness(hp.material->roughness);
+    float phi = 2.f*M_PIf*rndm.x;
+    float cosTheta = powf(rndm.y, (1.f/(1.f + exp)));
+    float sinTheta = sqrtf(1.0f-cosTheta*cosTheta);
+    vec3 wi = vec3(
+        sinTheta*cosf(phi),
+        sinTheta*sinf(phi),
+        cosTheta
+    );
+
+    return toWorldSpace(hp.norm, wi);
 }
 
 vec3 LayeredBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
     float R = this->fresnel(this->absdot(hp.norm, wo), 1.0f, hp.material->ior);
     return R*this->Coat->f(hp, wi, wo) + (1.0f - R) * this->Core->f(hp, wi, wo);
     // return this->Core->f(hp, wi, wo) + this->Coat->f(hp, wi, wo);
+}
+
+float LayeredBrdf::getPdf(const HitPoint& hp, const vec3& wi, const vec3& wo) {
+	const float F = fresnel(absdot(hp.norm, wo), 1.0f, hp.material->ior);
+
+    float pdfDiffuse = this->Core->getPdf(hp, wo, wi);
+
+    float pdfSpecular = this->Coat->getPdf(hp, wo, wi);
+    return (1.0f-F)*pdfDiffuse + F*pdfSpecular;
+}
+
+vec3 LayeredBrdf::getSample(HitPoint& hp, const vec3& wo, const vec2& rndm) {
+	const float F = fresnel(absdot(hp.norm, wo), 1.0f, hp.material->ior);
+	if (rndm.x < F) {
+		vec2 newRand((F-rndm.x)/F, rndm.y);
+		vec3 wi = this->Coat->getSample(hp, wo, newRand);
+
+		return wi;
+	}
+	else {
+		vec2 newRand((rndm.x-F)/(1.0f-F), rndm.y);
+		vec3 wi = this->Core->getSample(hp, wo, newRand);
+
+		return wi;
+	}
 }
 
 vec3 CookTorranceBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
@@ -76,4 +134,12 @@ vec3 CookTorranceBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
     float f = (F*D*G) / (4.0f * abs(NDotWi) * abs(NDotWo));
     
     return this->_isCoat ? vec3(f) : f * 15.0f * color_to_glm(hp.albedo());
+}
+
+float CookTorranceBrdf::getPdf(const HitPoint& hp, const vec3& wi, const vec3& wo) {
+    return 0.f;
+}
+
+vec3 CookTorranceBrdf::getSample(HitPoint& hp, const vec3& wo, const vec2& rndm) {
+    return vec3(0, 0, 0);
 }
