@@ -86,7 +86,7 @@ class BrdfFabric {
                     break;
                 }
                 case BrdfType::Phong: {
-                    return new PhongBrdf;
+                    return new PhongBrdf(false);
                     break;
                 }
                 case BrdfType::Layered: {

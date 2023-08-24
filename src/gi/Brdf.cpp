@@ -83,7 +83,10 @@ vec3 PhongBrdf::getSample(HitPoint& hp, const vec3& wo, const vec2& rndm) {
         cosTheta
     );
 
-    return toWorldSpace(hp.norm, wi);
+    vec3 wr = 2.0f*hp.norm*dot(hp.norm,wo) - wo;
+	return toWorldSpace(wr, wi);
+
+    // return toWorldSpace(hp.norm, wi);
 }
 
 vec3 LayeredBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
@@ -103,16 +106,22 @@ float LayeredBrdf::getPdf(const HitPoint& hp, const vec3& wi, const vec3& wo) {
 
 vec3 LayeredBrdf::getSample(HitPoint& hp, const vec3& wo, const vec2& rndm) {
 	const float F = fresnel(absdot(hp.norm, wo), 1.0f, hp.material->ior);
-	if (rndm.x < F) {
-		vec2 newRand((F-rndm.x)/F, rndm.y);
+	if (rndm.x >= .5f) {
+        // specular
+		// vec2 newRand((F-rndm.x)/F, rndm.y);
+        vec2 newRand(2.f*rndm.x, rndm.y);
 		vec3 wi = this->Coat->getSample(hp, wo, newRand);
 
+        // already in world space
 		return wi;
 	}
 	else {
-		vec2 newRand((rndm.x-F)/(1.0f-F), rndm.y);
+        // diffuse
+		// vec2 newRand((rndm.x-F)/(1.0f-F), rndm.y);
+        vec2 newRand(2.f*(rndm.x - .5f), rndm.y);
 		vec3 wi = this->Core->getSample(hp, wo, newRand);
 
+        // already in world space
 		return wi;
 	}
 }
