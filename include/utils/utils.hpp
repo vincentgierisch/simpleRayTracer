@@ -46,6 +46,11 @@ inline float cdot(const vec3 &a, const vec3 &b) {
     return x < 0.0f ? 0.0f : x;
 }
 
+inline float absdot(const vec3 &a, const vec3 &b) {
+    float x = a.x*b.x + a.y*b.y + a.z*b.z;
+    return x < 0.0f ? -x : x;
+}
+
 // Tom Duff (tangent space transformation)
 inline vec3 toWorldSpace(const vec3& vec, const vec3& norm) {
     // wi is just aligned to the basic hemisphere at (0,0), we need to align it to the normal

@@ -24,7 +24,8 @@ material emissive 7.8431 7.8431 7.8431
 material end
 
 
-default-brdf 2
+default-brdf 4
 rendererType 1
 
-outfile cornellBoxFresnel.png
+outfile results/cornellBox/muessteGutAussehen3Uniform.png
+#outfile results/cornellBox/CTFresnelUniformSampled256.png

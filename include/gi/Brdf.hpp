@@ -20,11 +20,8 @@ class Brdf {
         float fresnel (float cosThetaI, float n1, float n2);
         float ggx(float cosThetaH, float roughness);
         float ggxG(float cosThetaH, float roughness);
+        vec3 sampleDistribution(const vec2& rndm, float roughness);
         
-        inline float absdot(const vec3 &a, const vec3 &b) {
-            float x = a.x*b.x + a.y*b.y + a.z*b.z;
-            return x < 0.0f ? -x : x;
-        }
         virtual vec3 f(HitPoint& hp, vec3 wi, vec3 wo) = 0;
         virtual float getPdf(const HitPoint& hp, const vec3& wi, const vec3& wo) = 0;
         virtual vec3 getSample(HitPoint& hp, const vec3& wo, const vec2& rndm) = 0;

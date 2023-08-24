@@ -26,6 +26,17 @@ float Brdf::ggx(float cosThetaH, float roughness) {
     return sRoughness / (float(M_PI) * (1.0f + (sRoughness - 1.0f) * cosSThetaH)*(1.0f + (sRoughness - 1.0f) * cosSThetaH));
 }
 
+// https://www.tobias-franke.eu/log/2014/03/30/notes_on_importance_sampling.html
+vec3 Brdf::sampleDistribution(const vec2& rndm, float roughness) {
+    const float theta = atanf((roughness * sqrtf(rndm.x)) / sqrtf(1.f - rndm.x));
+    if (!std::isfinite(theta)) return vec3(0, 0, 1);
+    const float phi = 2.f * float(M_PI) * rndm.y;
+    const float sinTheta = sinf(theta);
+    return vec3(sinTheta * cosf(phi),
+                sinTheta * sinf(phi),
+                cosf(theta));
+}
+
 float Brdf::ggxG(float cosThetaH, float roughness) {
     if (cosThetaH <= 0) return 0.f;
     float sRoughness = roughness * roughness;
@@ -84,13 +95,13 @@ vec3 PhongBrdf::getSample(HitPoint& hp, const vec3& wo, const vec2& rndm) {
     );
 
     vec3 wr = 2.0f*hp.norm*dot(hp.norm,wo) - wo;
-	return toWorldSpace(wr, wi);
+	return toWorldSpace(wi, wr);
 
     // return toWorldSpace(hp.norm, wi);
 }
 
 vec3 LayeredBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
-    float R = this->fresnel(this->absdot(hp.norm, wo), 1.0f, hp.material->ior);
+    float R = this->fresnel(absdot(hp.norm, wo), 1.0f, hp.material->ior);
     return R*this->Coat->f(hp, wi, wo) + (1.0f - R) * this->Core->f(hp, wi, wo);
     // return this->Core->f(hp, wi, wo) + this->Coat->f(hp, wi, wo);
 }
@@ -146,9 +157,18 @@ vec3 CookTorranceBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
 }
 
 float CookTorranceBrdf::getPdf(const HitPoint& hp, const vec3& wi, const vec3& wo) {
-    return 0.f;
+    vec3 H = normalize(wo + wi);
+    float NdotH = dot(hp.norm, H);
+    float HdotV = dot(H, wo);
+    float D = ggx(NdotH, hp.material->roughness);
+
+    float ggxPdf = (D * (NdotH<0 ? -NdotH : NdotH)) / (4.f * (HdotV<0 ? -HdotV : HdotV));
+
+    return ggxPdf;
 }
 
 vec3 CookTorranceBrdf::getSample(HitPoint& hp, const vec3& wo, const vec2& rndm) {
-    return vec3(0, 0, 0);
+    vec3 wh = toWorldSpace(sampleDistribution(rndm, hp.material->roughness), hp.norm);
+    vec3 wi = 2.0f*wh*dot(wh, wo) - wo;
+    return wi;
 }
