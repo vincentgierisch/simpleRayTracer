@@ -43,7 +43,7 @@ std::pair<vec3, float> DirectAlbedoCalculator::getRandomVecOnHemisphere(const ve
                     sinTheta*sinf(phi),
                     z1);
     // wi is just aligned to the basic hemisphere at (0,0), we need to align it to the normal
-    return {toWorldSpace(wi, norm), 1.f/(2.f*M_PI)};
+    return {toWorldSpace(wi, norm), 1.f/(2.f*M_PIf)};
 }
 
 std::pair<vec3, float> DirectAlbedoCalculator::getRandomVecOnHemisphereCosineWeighted(const vec3& norm) {
