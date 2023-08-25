@@ -73,7 +73,7 @@ vec3 PhongBrdf::f(HitPoint& hp, vec3 wi, vec3 wo) {
 
 	float exponent = exponentFromRoughness(hp.material->roughness);
 	vec3 wr = 2.0f*hp.norm*dot(wi,hp.norm)-wi;
-    float norm = (exponent + 1.f) / (2.0f * M_PIf32);
+    float norm = (exponent + 2.0f) / (2.0f * M_PIf32);
     return (float)(powf(cdot(wr, wo), exponent) * norm * cdot(wi,hp.norm)) * (this->_isCoat ? vec3(1) : color_to_glm(hp.albedo()));
 }
 
