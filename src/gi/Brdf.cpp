@@ -117,10 +117,10 @@ float LayeredBrdf::getPdf(const HitPoint& hp, const vec3& wi, const vec3& wo) {
 
 vec3 LayeredBrdf::getSample(HitPoint& hp, const vec3& wo, const vec2& rndm) {
 	const float F = fresnel(absdot(hp.norm, wo), 1.0f, hp.material->ior);
-	if (rndm.x >= .5f) {
+	if (rndm.x < F) {
         // specular
-		// vec2 newRand((F-rndm.x)/F, rndm.y);
-        vec2 newRand(2.f*rndm.x, rndm.y);
+		vec2 newRand((F-rndm.x)/F, rndm.y);
+        // vec2 newRand(2.f*rndm.x, rndm.y);
 		vec3 wi = this->Coat->getSample(hp, wo, newRand);
 
         // already in world space
@@ -128,8 +128,8 @@ vec3 LayeredBrdf::getSample(HitPoint& hp, const vec3& wo, const vec2& rndm) {
 	}
 	else {
         // diffuse
-		// vec2 newRand((rndm.x-F)/(1.0f-F), rndm.y);
-        vec2 newRand(2.f*(rndm.x - .5f), rndm.y);
+		vec2 newRand((rndm.x-F)/(1.0f-F), rndm.y);
+        // vec2 newRand(2.f*(rndm.x - .5f), rndm.y);
 		vec3 wi = this->Core->getSample(hp, wo, newRand);
 
         // already in world space
