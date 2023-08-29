@@ -8,16 +8,21 @@ Color DirectAlbedoCalculator::calculateAlbedo(HitPoint& hitpoint, Ray& ray, RayT
 
     Color resultColor(0, 0, 0);
 
-    float expo = exponentFromRoughness(hitpoint.material->roughness);
-    float a = hitpoint.material->ior;
-
+    /*
     // auto[wi, pdf] = this->getRandomVecOnHemisphere(hitpoint.norm);
     vec2 rndmVec = randomVec2(0, 0.9999f);
     vec3 wi = hitpoint.material->brdf->getSample(hitpoint, -ray.direction, rndmVec);
     float pdf = hitpoint.material->brdf->getPdf(hitpoint, wi, -ray.direction);
     Ray randomRay(hitpoint.x, wi);
     randomRay.setMax(1000.f);
-
+    */
+    Scene& scene = Scene::getInstance();
+    // get random light
+    int randId = rand()%scene.LightSources.size();
+    LightSource* ls = &scene.LightSources[randId];
+    Ray randomRay(hitpoint.x, randomPointOnTriangle(scene.Vertices[ls->triangle->a].pos, scene.Vertices[ls->triangle->b].pos, scene.Vertices[ls->triangle->c].pos));
+    randomRay.setMax(1000.f);
+    float pdf = 1.f/(2.f*M_PIf);
     TriangleIntersection intersection = rt->closest_hit(randomRay);
 
     if(intersection.isValid()) {

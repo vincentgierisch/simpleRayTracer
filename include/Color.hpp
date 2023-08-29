@@ -13,12 +13,14 @@ class Color {
         Color(): red(0), green(0), blue(0){};
         Color(float r, float g, float b): red(r), green(g), blue(b) {};
         Color(float r, float g, float b, float alpha): red(r), green(g), blue(b), alpha(alpha) {};
+        Color(float a): red(a), green(a), blue(a) {};
         Color(const vec3& v) : red(v.x), green(v.y), blue(v.z) {};
         Color operator * (float d) {return Color(red*d, green*d, blue*d);}
         Color operator / (float d) {return Color(red/d, green/d, blue/d);}
         Color operator * (Color& c) {return Color(this->red * c.red, this->green * c.green, this->blue * c.blue); }
-        Color operator * (vec3 c) {return Color(this->red * c.x, this->green * c.y, this->blue * c.z); }
-        bool operator != (Color c) {return !(this->red == c.red && this->green == c.green && this->blue == c.blue);}
+        Color operator * (const vec3& c) {return Color(this->red * c.x, this->green * c.y, this->blue * c.z); }
+        bool operator != (const Color& c) {return !(this->red == c.red && this->green == c.green && this->blue == c.blue);}
+        bool operator != (const vec3& c) {return !(this->red == c.x && this->green == c.y && this->blue == c.z);}
         void clamp255();
 };
 

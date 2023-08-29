@@ -15,6 +15,7 @@ void Renderer::init(std::string jobPath, DisplayType displayType) {
         this->_window = new Window(this->_width, this->_height);
     }
 
+    // setup progressbar
     this->_progressBar = ProgressBar(0.05);
 
     // init framebuffer
@@ -28,13 +29,12 @@ void Renderer::init(std::string jobPath, DisplayType displayType) {
     scene.DefaultBrdfType = (BrdfType) jd.DefaultBrdf;
     scene.Brdfs.emplace(std::make_pair(scene.DefaultBrdfType, BrdfFabric::getBrdf(scene.DefaultBrdfType)));
 
+    scene.load(jd.ObjFilePath);
 
     for (JobData::PointLightData& pld : jd.PointLights) {
         Pointlight pl(pld.Position, pld.Color);
         scene.Pointlights.push_back(pl);
     }
-
-    scene.load(jd.ObjFilePath);
 
     // check if job has overwritten materials
     for (Material& material : scene.Materials) {
@@ -50,9 +50,27 @@ void Renderer::init(std::string jobPath, DisplayType displayType) {
                 material.emissive = md.getEmissive();
         }
     }
-
+    this->_initLightSources(scene);
     this->_initAlbedoCalculator();
     this->_initRayTracer(jd.RayTracer);
+}
+
+void Renderer::_initLightSources(Scene& scene) {
+    // Loop through all triangles and check if they are emmissive
+    std::cout << "Build light stack" << std::endl;
+    for(Triangle& triangle : scene.Triangles) {
+        Material* material = &(scene.Materials[triangle.material_id]);
+        if (Color(0) != material->emissive) {
+            std::vector<Vertex>* vertices = &scene.Vertices;
+            LightSource ls;
+            ls.triangle = &triangle;
+            ls.area = 0.5f*length(cross(vertices->at(triangle.b).pos-vertices->at(triangle.a).pos, vertices->at(triangle.c).pos-vertices->at(triangle.a).pos));
+            ls.power = material->emissive * ls.area * (float)M_PI;
+            scene.LightSources.push_back(ls);
+        }
+    }
+    std::cout << scene.LightSources.size() << " emitting triangles found" << std::endl;
+    std::cout << "Done building light stack" << std::endl;
 }
 
 void Renderer::_initRayTracer(std::string& rtype) {

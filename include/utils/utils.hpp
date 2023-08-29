@@ -51,6 +51,16 @@ inline float absdot(const vec3 &a, const vec3 &b) {
     return x < 0.0f ? -x : x;
 }
 
+inline vec3 randomPointOnTriangle(const vec3& a, const vec3& b, const vec3& c) {
+    vec2 p = randomVec2(0, 1);
+    if(p.x + p.y >= 1) {
+        p.x = 1-p.x;
+        p.y = 1-p.y;
+    }
+    // A + R*AB + S*AC
+    return a + p.x*(b-a) + p.y*(c-a);
+}
+
 // Tom Duff (tangent space transformation)
 inline vec3 toWorldSpace(const vec3& vec, const vec3& norm) {
     // wi is just aligned to the basic hemisphere at (0,0), we need to align it to the normal

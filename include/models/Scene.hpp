@@ -43,6 +43,7 @@ class Scene {
         std::vector<Material> Materials;
         std::vector<Texture*> Textures;
         std::vector<Pointlight> Pointlights;
+        std::vector<LightSource> LightSources;
         std::map<BrdfType, Brdf*> Brdfs;
         BrdfType DefaultBrdfType;
         void load(const std::string pat);

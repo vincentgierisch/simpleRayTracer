@@ -50,6 +50,7 @@ class Renderer {
         void _buildPicture();
         void _initAlbedoCalculator();
         void _initRayTracer(std::string& rtype);
+        void _initLightSources(Scene& scene);
     public:
         Renderer(): _framebuffer(0, 0), _type(RendererType::LocalIllumination) {};
         void init(std::string jobPath, DisplayType displayType);
