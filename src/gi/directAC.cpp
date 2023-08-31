@@ -1,6 +1,6 @@
 #include "../../include/gi/directAC.h"
 
-Color DirectAlbedoCalculator::calculateAlbedo(HitPoint& hitpoint, Ray& ray, RayTracer* rt) {
+Color DirectAlbedoCalculator::calculateAlbedo(HitPoint& hitpoint, Ray& ray, const RendererContainer& rendererContainer) {
     if (color_to_glm(hitpoint.material->emissive) != vec3(0)) {
         // return Color(0.592f, 0.902f, 0.941f);
         return Color(1, 1, 1);
@@ -8,33 +8,76 @@ Color DirectAlbedoCalculator::calculateAlbedo(HitPoint& hitpoint, Ray& ray, RayT
 
     Color resultColor(0, 0, 0);
 
-    /*
-    // auto[wi, pdf] = this->getRandomVecOnHemisphere(hitpoint.norm);
-    vec2 rndmVec = randomVec2(0, 0.9999f);
-    vec3 wi = hitpoint.material->brdf->getSample(hitpoint, -ray.direction, rndmVec);
-    float pdf = hitpoint.material->brdf->getPdf(hitpoint, wi, -ray.direction);
-    Ray randomRay(hitpoint.x, wi);
-    randomRay.setMax(1000.f);
-    */
+    // light sampling has to be processed different
+    if (rendererContainer.samplingType == ImportanceSamplingType::Light) {
+        auto[randomRay, pdf, radiance] = this->sampleLight(hitpoint);
+        if(!rendererContainer.rayTracer->any_hit(randomRay)) {
+            resultColor = radiance * hitpoint.material->brdf->f(hitpoint, -ray.direction, randomRay.direction) * (1.f/pdf);
+        }
+    } else {
+        auto[wi, pdf] = this->getSample(hitpoint, ray, rendererContainer.samplingType);
+        Ray randomRay(hitpoint.x, wi);
+        randomRay.setMax(1000.f);
+
+        TriangleIntersection intersection = rendererContainer.rayTracer->closest_hit(randomRay);
+
+        if(intersection.isValid()) {
+            HitPoint bouncedHitPoint(intersection);
+            
+            Color radiance = bouncedHitPoint.material->emissive;
+            resultColor = radiance * hitpoint.material->brdf->f(hitpoint, -ray.direction, randomRay.direction) * cdot(randomRay.direction, hitpoint.norm) * (1.f/pdf);
+        }
+    }
+
+    return resultColor;
+}
+
+std::pair<vec3, float> DirectAlbedoCalculator::getSample(HitPoint& hitPoint, const Ray& ray, ImportanceSamplingType type) {
+    switch (type)
+    {
+        case ImportanceSamplingType::Cosine:
+        {
+            return this->getRandomVecOnHemisphereCosineWeighted(hitPoint.norm);
+            break;
+        }
+        case ImportanceSamplingType::Brdf:
+        {
+            vec2 rndmVec = randomVec2(0, 0.9999f);
+            vec3 wi = hitPoint.material->brdf->getSample(hitPoint, -ray.direction, rndmVec);
+            float pdf = hitPoint.material->brdf->getPdf(hitPoint, wi, -ray.direction);
+            return {wi, pdf};
+            break;
+        }
+        case ImportanceSamplingType::Uniform:
+        {
+            return this->getRandomVecOnHemisphere(hitPoint.norm);
+            break;
+        }
+        default:
+        {
+            return{vec3(0), 1.f};
+            break;
+        }
+    }
+}
+
+std::tuple<Ray, float, Color> DirectAlbedoCalculator::sampleLight(const HitPoint& hitPoint) {
     Scene& scene = Scene::getInstance();
     // get random light
     int randId = rand()%scene.LightSources.size();
     LightSource* ls = &scene.LightSources[randId];
-    Ray randomRay(hitpoint.x, randomPointOnTriangle(scene.Vertices[ls->triangle->a].pos, scene.Vertices[ls->triangle->b].pos, scene.Vertices[ls->triangle->c].pos));
-    randomRay.setMax(1000.f);
-    float pdf = 1.f/(2.f*M_PIf);
-    TriangleIntersection intersection = rt->closest_hit(randomRay);
+    auto[toLight, LightNorm] = randomPointOnTriangle(scene.Vertices[ls->triangle->a], scene.Vertices[ls->triangle->b], scene.Vertices[ls->triangle->c]);
+    vec3 wi = toLight-hitPoint.x;
+    Ray ray(hitPoint.x, normalize(wi));
+    
+    float tmax = length(wi);
+	wi /= tmax;
+	ray.setMax(tmax);
 
-    if(intersection.isValid()) {
-        HitPoint bouncedHitPoint(intersection);
-        
-        Color radiance = bouncedHitPoint.material->emissive;
-
-        // resultColor = radiance * hitpoint.material->brdf->f(hitpoint, -ray.direction, randomRay.direction) * cdot(randomRay.direction, hitpoint.norm) * (1.f/pdf);
-        resultColor = radiance * hitpoint.material->brdf->f(hitpoint, -ray.direction, randomRay.direction) * cdot(randomRay.direction, hitpoint.norm) * (1.f/pdf);
-    }
-
-    return resultColor;
+    float cosTheta = dot(LightNorm,-wi);
+	if (cosTheta <= 0.0f) return {ray, 0.0f, Color(0)};
+	float pdf = tmax*tmax/(cosTheta * ls->area);
+    return {ray, pdf, ls->power};
 }
 
 std::pair<vec3, float> DirectAlbedoCalculator::getRandomVecOnHemisphere(const vec3& norm) {

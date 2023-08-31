@@ -51,14 +51,15 @@ inline float absdot(const vec3 &a, const vec3 &b) {
     return x < 0.0f ? -x : x;
 }
 
-inline vec3 randomPointOnTriangle(const vec3& a, const vec3& b, const vec3& c) {
-    vec2 p = randomVec2(0, 1);
-    if(p.x + p.y >= 1) {
-        p.x = 1-p.x;
-        p.y = 1-p.y;
-    }
-    // A + R*AB + S*AC
-    return a + p.x*(b-a) + p.y*(c-a);
+inline std::pair<vec3, vec3> randomPointOnTriangle(const Vertex& a, const Vertex& b, const Vertex& c) {
+    vec2 p = randomVec2(0.f, 0.9999f);
+
+    float sqrta = sqrtf(p.x);
+    vec2 st(1.f-sqrta, p.y*sqrta);
+    vec3 wi = (1.0f-st.x-st.y)*a.pos + st.x*b.pos + st.y*c.pos;
+    vec3 n = (1.0f-st.x-st.y)*a.norm + st.x*b.norm + st.y*c.norm;
+
+    return {wi, n};
 }
 
 // Tom Duff (tangent space transformation)
@@ -72,5 +73,19 @@ inline vec3 toWorldSpace(const vec3& vec, const vec3& norm) {
 
     return tangent * vec.x + bitangent * vec.y + norm * vec.z;
 }
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsequence-point"
+inline void test_vector(std::vector<std::pair<vec3, vec3>>& rays, std::string outPath) {
+	std::ofstream out(outPath);
+	unsigned int i = 1;
+
+    for (std::pair<vec3, vec3>& ray : rays) {
+        out << "v " << ray.first.x << " " << ray.first.y << " " << ray.first.z << std::endl;
+        out << "v " << ray.second.x << " " << ray.second.y << " " << ray.second.z << std::endl;
+        out << "l " << i++ << " " << i++ << std::endl;
+    }
+}
+#pragma GCC diagnostic pop
 
 #endif

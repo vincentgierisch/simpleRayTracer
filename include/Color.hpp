@@ -21,6 +21,7 @@ class Color {
         Color operator * (const vec3& c) {return Color(this->red * c.x, this->green * c.y, this->blue * c.z); }
         bool operator != (const Color& c) {return !(this->red == c.red && this->green == c.green && this->blue == c.blue);}
         bool operator != (const vec3& c) {return !(this->red == c.x && this->green == c.y && this->blue == c.z);}
+        bool operator == (const Color& c) {return this->red == c.red && this->green == c.green && this->blue == c.blue;}
         void clamp255();
 };
 

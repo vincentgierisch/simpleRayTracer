@@ -45,6 +45,7 @@ struct JobData {
     };
     
     short DefaultBrdf = 0;
+    short DefaultImportanceSampling = 0;
     vec3 CameraPosition;
     vec3 CameraDirection;
     vec3 CameraUp;

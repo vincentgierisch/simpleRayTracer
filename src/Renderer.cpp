@@ -7,6 +7,7 @@ void Renderer::init(std::string jobPath, DisplayType displayType) {
     this->_sspx = jd.SamplesPerPixel;
     this->_outPath = jd.OutPath;
     this->_type = (RendererType)jd.RendererType;
+    this->_rendererContainer.samplingType = (ImportanceSamplingType)jd.DefaultImportanceSampling;
 
     this->_width = unsigned(jd.Resolution.x);
     this->_height = unsigned(jd.Resolution.y);
@@ -50,9 +51,15 @@ void Renderer::init(std::string jobPath, DisplayType displayType) {
                 material.emissive = md.getEmissive();
         }
     }
-    this->_initLightSources(scene);
+    
     this->_initAlbedoCalculator();
     this->_initRayTracer(jd.RayTracer);
+
+    // has to be done after bvh was build
+    this->_initLightSources(scene);
+
+    this->_rendererContainer.rayTracer = this->_rayTracer;
+    this->_rendererContainer.scene = &scene;
 }
 
 void Renderer::_initLightSources(Scene& scene) {
@@ -65,7 +72,8 @@ void Renderer::_initLightSources(Scene& scene) {
             LightSource ls;
             ls.triangle = &triangle;
             ls.area = 0.5f*length(cross(vertices->at(triangle.b).pos-vertices->at(triangle.a).pos, vertices->at(triangle.c).pos-vertices->at(triangle.a).pos));
-            ls.power = material->emissive * ls.area * (float)M_PI;
+            // ls.power = material->emissive * ls.area * (float)M_PI;
+            ls.power = material->emissive;
             scene.LightSources.push_back(ls);
         }
     }
@@ -143,7 +151,7 @@ Color Renderer::sample_pixel(unsigned int x, unsigned int y) {
         TriangleIntersection intersection = this->_rayTracer->closest_hit(ray);
         if (intersection.isValid()) {
             HitPoint hitPoint(intersection);
-            sampleColor = this->_albedoCalculator->calculateAlbedo(hitPoint, ray, this->_rayTracer);
+            sampleColor = this->_albedoCalculator->calculateAlbedo(hitPoint, ray, this->_rendererContainer);
         }
         result.push_back(sampleColor);
     }

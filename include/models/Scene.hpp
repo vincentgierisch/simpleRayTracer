@@ -9,13 +9,13 @@
 #include <glm/glm.hpp>
 #include <map>
 
-#include "gi/BrdfType.hpp"
+#include "../gi/BrdfType.hpp"
 #include "Primitives.hpp"
-#include "gi/Brdf.hpp"
-#include "gi/Material.hpp"
-#include "gi/Texture.hpp"
+#include "../gi/Brdf.hpp"
+#include "../gi/Material.hpp"
+#include "../gi/Texture.hpp"
 #include "../utils/utils.hpp"
-#include "Color.hpp"
+#include "../Color.hpp"
 #include "../gi/Camera.hpp"
 #include "Pointlight.hpp"
 

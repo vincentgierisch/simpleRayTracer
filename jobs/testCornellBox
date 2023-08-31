@@ -6,7 +6,7 @@ raytracer bvh
 
 load render-data/cornell-box.obj
 sppx 32
-resolution 1280 720
+resolution 960 540
 pointlight pos 0.884011 4.318497 -3.567968 col 35 30 26
 #pointlight pos 2 2.25 -18 col 7 4 2
 
@@ -25,8 +25,9 @@ material emissive 7.8431 7.8431 7.8431
 material end
 
 
-default-brdf 2
+default-brdf 4
 rendererType 1
+importance-sampling-type 3
 
-outfile results/cornellBox/lightSampling32.png
+outfile results/cornellBox/lightSampling32_Light.png
 #outfile results/cornellBox/CTFresnelUniformSampled256.png

@@ -32,7 +32,7 @@ void ProgressBar::_draw() {
     std::cout << "] " << int(this->_progress * 100.0) << " %\r";
 	std::cout.flush();
 
-    if(this->_progress == 1) {
+    if(this->_progress >= 1) {
         std::cout << std::endl;
     }
 }
